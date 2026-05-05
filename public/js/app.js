@@ -1,0 +1,526 @@
+let currentUser = null;
+let currentUserRole = null;
+let currentMonth = new Date();
+let currentEditingEvent = null;
+let appData = {
+  events: [],
+  assignments: [],
+  progress: {},
+  messages: {}
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  updateDate();
+  checkAuthentication();
+  setupEventListeners();
+});
+
+function checkAuthentication() {
+  if (isAuthenticated()) {
+    currentUser = getUsername();
+    currentUserRole = getRole();
+    showApp();
+    initApp();
+  }
+}
+
+function setupEventListeners() {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      switchSection(this.dataset.section);
+    });
+  });
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('usernameInput').value;
+  const password = document.getElementById('passwordInput').value;
+
+  try {
+    const result = await api.auth.login(username, password);
+    currentUser = result.user.username;
+    currentUserRole = result.user.role;
+    showApp();
+    initApp();
+  } catch (error) {
+    showError(error.message || 'Login failed');
+  }
+}
+
+async function handleLogout() {
+  if (confirm('Logout?')) {
+    await api.auth.logout();
+    currentUser = null;
+    currentUserRole = null;
+    location.reload();
+  }
+}
+
+function showError(msg) {
+  const errorEl = document.getElementById('errorMsg');
+  errorEl.textContent = msg;
+  errorEl.style.display = 'block';
+  setTimeout(() => errorEl.style.display = 'none', 3000);
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'flex';
+}
+
+function notify(msg, type = 'success') {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type === 'error' ? 'error' : ''}`;
+  notif.textContent = msg;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 3000);
+}
+
+function updateDate() {
+  const now = new Date();
+  document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+}
+
+async function initApp() {
+  updateUI();
+  setupNavigation();
+  await loadAllData();
+  renderCalendar();
+  await updateDashboard();
+}
+
+function updateUI() {
+  const roleNames = {
+    student: `👨‍🎓 ${currentUser}`,
+    conveyor: `👩‍🏫 ${currentUser}`,
+    supervisor: `👩‍💼 Prof. ${currentUser}`
+  };
+
+  document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;
+  document.getElementById('userDisplay').textContent = `Logged in as ${currentUserRole}`;
+
+  const isConveyor = currentUserRole === 'conveyor';
+  document.getElementById('lectureUpload').style.display = isConveyor ? 'block' : 'none';
+  document.getElementById('recordingUpload').style.display = isConveyor ? 'block' : 'none';
+  document.getElementById('materialUpload').style.display = isConveyor ? 'block' : 'none';
+  document.getElementById('assignmentCreateForm').style.display = isConveyor ? 'block' : 'none';
+
+  const isSupervisor = currentUserRole === 'supervisor';
+  document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
+
+  if (currentUserRole !== 'student') {
+    document.getElementById('monthlyUpdate').disabled = true;
+    document.getElementById('pty6027').disabled = true;
+    document.getElementById('pty6028').disabled = true;
+  }
+}
+
+function setupNavigation() {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      switchSection(this.dataset.section);
+    });
+  });
+}
+
+async function switchSection(section) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(section + 'Section').classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+  const titles = {
+    dashboard: '📊 Dashboard',
+    calendar: '📅 Calendar',
+    resources: '📁 Resources',
+    assignments: '✏️ Assignments',
+    progress: '📈 Progress',
+    messages: '💬 Messages'
+  };
+
+  document.getElementById('pageTitle').textContent = titles[section];
+
+  if (section === 'calendar') {
+    renderCalendar();
+    await renderAllEvents();
+  } else if (section === 'progress') {
+    await loadProgress();
+  } else if (section === 'assignments') {
+    await loadAssignments();
+  } else if (section === 'resources') {
+    await loadResources();
+  } else if (section === 'messages') {
+    await loadMessages('conveyor');
+    await loadMessages('supervisor');
+  }
+}
+
+async function loadAllData() {
+  try {
+    appData.events = await api.events.getAll();
+    appData.assignments = await api.assignments.getAll();
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+}
+
+// CALENDAR
+function renderCalendar() {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  document.getElementById('calendarMonth').textContent =
+    currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  let html = '';
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  days.forEach(d => {
+    html += `<div class="calendar-day-header">${d}</div>`;
+  });
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="calendar-day other-month"><div class="calendar-day-number">${daysInPrevMonth - i}</div></div>`;
+  }
+
+  const today = new Date();
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const isToday = date.toDateString() === today.toDateString();
+    const dateStr = date.toISOString().split('T')[0];
+    const dayEvents = appData.events.filter(e => e.date === dateStr);
+
+    html += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="openEventModal('${dateStr}')">
+      <div class="calendar-day-number">${day}</div>
+      <div class="day-events">`;
+
+    dayEvents.slice(0, 2).forEach(e => {
+      const color = { assessment: 'event-assessment', deadline: 'event-deadline', work: 'event-work', class: 'event-class' };
+      html += `<div class="event-badge ${color[e.type] || ''}">${e.title}</div>`;
+    });
+
+    if (dayEvents.length > 2) html += `<div style="font-size: 10px; color: var(--text-light);">+${dayEvents.length - 2} more</div>`;
+    html += `</div></div>`;
+  }
+
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  for (let day = 1; day <= totalCells - firstDay - daysInMonth; day++) {
+    html += `<div class="calendar-day other-month"><div class="calendar-day-number">${day}</div></div>`;
+  }
+
+  document.getElementById('calendarGrid').innerHTML = html;
+}
+
+function previousMonth() {
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
+  renderCalendar();
+}
+
+function nextMonth() {
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+  renderCalendar();
+}
+
+function todayMonth() {
+  currentMonth = new Date();
+  renderCalendar();
+}
+
+// EVENTS
+async function openEventModal(dateStr = null) {
+  if (currentUserRole !== 'student' && currentUserRole !== 'conveyor') return;
+
+  currentEditingEvent = null;
+  document.getElementById('modalTitle').textContent = 'Add Event';
+  document.getElementById('eventForm').reset();
+  document.getElementById('deleteEventBtn').style.display = 'none';
+
+  if (dateStr) {
+    document.getElementById('eventStart').value = dateStr;
+    document.getElementById('eventEnd').value = dateStr;
+  }
+
+  document.getElementById('eventModal').classList.add('active');
+}
+
+function closeEventModal() {
+  document.getElementById('eventModal').classList.remove('active');
+  currentEditingEvent = null;
+}
+
+async function saveEvent(e) {
+  e.preventDefault();
+
+  const event = {
+    title: document.getElementById('eventTitle').value,
+    type: document.getElementById('eventType').value,
+    date: document.getElementById('eventStart').value,
+    endDate: document.getElementById('eventEnd').value,
+    description: document.getElementById('eventDesc').value,
+    reminder: document.getElementById('eventReminder').checked
+  };
+
+  try {
+    if (currentEditingEvent) {
+      await api.events.update(currentEditingEvent.id, event);
+    } else {
+      await api.events.create(event);
+    }
+
+    await loadAllData();
+    closeEventModal();
+    renderCalendar();
+    await renderAllEvents();
+    await updateDashboard();
+    notify('✅ Event saved!');
+  } catch (error) {
+    notify('Error saving event: ' + error.message, 'error');
+  }
+}
+
+async function deleteEvent() {
+  if (!currentEditingEvent) return;
+  if (!confirm('Delete this event?')) return;
+
+  try {
+    await api.events.delete(currentEditingEvent.id);
+    await loadAllData();
+    closeEventModal();
+    renderCalendar();
+    await renderAllEvents();
+    await updateDashboard();
+    notify('Event deleted');
+  } catch (error) {
+    notify('Error deleting event: ' + error.message, 'error');
+  }
+}
+
+async function renderAllEvents() {
+  const sorted = [...appData.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+  let html = sorted.length ? sorted.map(e => `
+    <div class="event-item">
+      <div class="event-item-content">
+        <div class="event-item-title">${e.title}</div>
+        <div class="event-item-meta">
+          📅 ${new Date(e.date).toLocaleDateString()} |
+          <span style="display: inline-block; padding: 2px 6px; background: var(--light); border-radius: 3px; margin: 0 4px;">
+            ${e.type}
+          </span>
+          Created by: ${e.created_by}
+        </div>
+      </div>
+      ${(currentUserRole === 'conveyor' || currentUserRole === e.created_by) ? `
+        <button class="btn btn-primary btn-small" onclick="editEvent(${e.id})">Edit</button>
+      ` : ''}
+    </div>
+  `).join('') : '<p style="color: var(--text-light); font-size: 13px;">No events yet</p>';
+
+  document.getElementById('allEventsList').innerHTML = html;
+}
+
+async function editEvent(id) {
+  const event = appData.events.find(e => e.id === id);
+  if (!event) return;
+
+  currentEditingEvent = event;
+  document.getElementById('modalTitle').textContent = 'Edit Event';
+  document.getElementById('eventTitle').value = event.title;
+  document.getElementById('eventType').value = event.type;
+  document.getElementById('eventStart').value = event.date;
+  document.getElementById('eventEnd').value = event.end_date;
+  document.getElementById('eventDesc').value = event.description;
+  document.getElementById('eventReminder').checked = event.reminder;
+  document.getElementById('deleteEventBtn').style.display = 'block';
+
+  document.getElementById('eventModal').classList.add('active');
+}
+
+// ASSIGNMENTS
+async function createAssignment() {
+  const title = document.getElementById('assignTitle').value;
+  const desc = document.getElementById('assignDesc').value;
+  const due = document.getElementById('assignDue').value;
+
+  if (!title || !desc || !due) return alert('Fill all fields');
+
+  try {
+    await api.assignments.create({ title, description: desc, dueDate: due });
+    document.getElementById('assignTitle').value = '';
+    document.getElementById('assignDesc').value = '';
+    document.getElementById('assignDue').value = '';
+    await loadAssignments();
+    await updateDashboard();
+    notify('✅ Assignment created!');
+  } catch (error) {
+    notify('Error creating assignment: ' + error.message, 'error');
+  }
+}
+
+async function loadAssignments() {
+  try {
+    appData.assignments = await api.assignments.getAll();
+    let html = appData.assignments.length ? appData.assignments.map(a => `
+      <div class="event-item" style="border-left-color: var(--warning);">
+        <div class="event-item-content">
+          <div class="event-item-title">${a.title}</div>
+          <div class="event-item-meta">Due: ${new Date(a.due_date).toLocaleDateString()} | Status: ${a.status}</div>
+          <div style="margin-top: 8px; font-size: 13px; color: var(--text);">${a.description}</div>
+        </div>
+      </div>
+    `).join('') : '<p style="color: var(--text-light);">No assignments</p>';
+
+    document.getElementById('assignmentsList').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading assignments:', error);
+  }
+}
+
+// PROGRESS
+async function saveProgress() {
+  try {
+    const progress = {
+      monthlyUpdate: document.getElementById('monthlyUpdate').value,
+      pty6027: document.getElementById('pty6027').value,
+      pty6028: document.getElementById('pty6028').value,
+      supervisorFeedback: document.getElementById('feedbackArea').value
+    };
+    await api.progress.update(currentUser, progress);
+    await updateDashboard();
+    notify('✅ Progress saved!');
+  } catch (error) {
+    notify('Error saving progress: ' + error.message, 'error');
+  }
+}
+
+async function loadProgress() {
+  try {
+    const p = await api.progress.get(currentUser);
+    document.getElementById('monthlyUpdate').value = p.monthlyUpdate || '';
+    document.getElementById('pty6027').value = p.pty6027 || 0;
+    document.getElementById('pty6028').value = p.pty6028 || 0;
+    document.getElementById('feedbackArea').value = p.supervisorFeedback || '';
+  } catch (error) {
+    console.error('Error loading progress:', error);
+  }
+}
+
+// MESSAGES
+async function sendMessage(recipient) {
+  const input = document.getElementById(recipient + 'Msg');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  try {
+    await api.messages.send(recipient, msg);
+    input.value = '';
+    await loadMessages(recipient);
+    notify('📨 Message sent!');
+  } catch (error) {
+    notify('Error sending message: ' + error.message, 'error');
+  }
+}
+
+async function loadMessages(recipient) {
+  try {
+    const msgs = await api.messages.getWithRecipient(recipient);
+    let html = msgs.map(m => `
+      <div class="event-item">
+        <div class="event-item-content">
+          <div class="event-item-title">${m.sender}</div>
+          <div class="event-item-meta">${new Date(m.timestamp).toLocaleString()}</div>
+          <div style="margin-top: 8px; color: var(--text);">${m.content}</div>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById(recipient + 'Messages').innerHTML = html || '<p style="color: var(--text-light);">No messages</p>';
+  } catch (error) {
+    console.error('Error loading messages:', error);
+  }
+}
+
+// RESOURCES
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tab + 'Tab').classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function loadResources() {
+  try {
+    for (let type of ['lectures', 'recordings', 'materials']) {
+      const resources = await api.resources.getByType(type);
+      const html = resources.length ? resources.map((f, i) => `
+        <div class="event-item">
+          <div class="event-item-content">
+            <div class="event-item-title">📄 ${f.name}</div>
+            <div class="event-item-meta">${f.size} MB • ${f.created_at}</div>
+          </div>
+          ${currentUserRole === 'conveyor' ? `<button class="btn btn-danger btn-small" onclick="deleteResource('${type}', ${f.id})">Delete</button>` : ''}
+        </div>
+      `).join('') : '<p style="color: var(--text-light);">No files</p>';
+
+      document.getElementById(type + 'List').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Error loading resources:', error);
+  }
+}
+
+async function deleteResource(type, id) {
+  try {
+    await api.resources.delete(id);
+    await loadResources();
+    notify('Resource deleted');
+  } catch (error) {
+    notify('Error deleting resource: ' + error.message, 'error');
+  }
+}
+
+// DASHBOARD
+async function updateDashboard() {
+  try {
+    const upcomingDays = 7;
+    const today = new Date();
+    const upcoming = appData.events
+      .filter(e => {
+        const eDate = new Date(e.date);
+        return eDate >= today && eDate <= new Date(today.getTime() + upcomingDays * 24 * 60 * 60 * 1000);
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    document.getElementById('stat-events').textContent = appData.events.length;
+    document.getElementById('stat-assignments').textContent = appData.assignments.length;
+
+    const progress = await api.progress.get(currentUser);
+    const avg = progress.pty6027 && progress.pty6028 ? Math.round((parseInt(progress.pty6027) + parseInt(progress.pty6028)) / 2) : 0;
+    document.getElementById('stat-progress').textContent = avg + '%';
+
+    document.getElementById('upcomingEventsList').innerHTML = upcoming.length ? upcoming.map(e => `
+      <div class="event-item">
+        <div class="event-item-content">
+          <div class="event-item-title">${e.title}</div>
+          <div class="event-item-meta">📅 ${new Date(e.date).toLocaleDateString()} | ${e.type}</div>
+        </div>
+      </div>
+    `).join('') : '<p style="color: var(--text-light);">No upcoming events in the next 7 days</p>';
+
+    let totalMessages = 0;
+    try {
+      const convMsgs = await api.messages.getWithRecipient('conveyor');
+      const supMsgs = await api.messages.getWithRecipient('supervisor');
+      totalMessages = convMsgs.length + supMsgs.length;
+    } catch (e) {}
+    document.getElementById('stat-messages').textContent = totalMessages;
+  } catch (error) {
+    console.error('Error updating dashboard:', error);
+  }
+}

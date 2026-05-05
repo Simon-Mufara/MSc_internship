@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSc Study Platform - UCT & UFS Collaboration</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js" rel="preload" as="script">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #001f3f;
+            --secondary: #003d7a;
+            --accent: #00a86b;
+            --accent-dark: #008856;
+            --blue: #1976d2;
+            --danger: #d32f2f;
+            --warning: #ff9800;
+            --light: #f9f9f9;
+            --border: #e0e0e0;
+            --text: #333;
+            --text-light: #666;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--text);
+        }
+
+        .app-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* LOGIN */
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 12px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .login-box h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-box .subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .role-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .role-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .role-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .login-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .login-submit:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* MAIN APP */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 0;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--primary);
+            color: white;
+            padding: 20px 0;
+            border-right: 3px solid var(--accent);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .user-badge {
+            background: var(--accent);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(0,168,107,0.2);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .topbar h2 {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .topbar-info {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: var(--light);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--accent);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* CALENDAR */
+        .calendar-wrapper {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .calendar-header h3 {
+            color: var(--primary);
+        }
+
+        .calendar-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* CALENDAR GRID */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            min-height: 120px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #f0f8ff;
+            border-color: var(--accent);
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .calendar-day.other-month .calendar-day-number {
+            color: #ccc;
+        }
+
+        .calendar-day.today {
+            background: rgba(0, 168, 107, 0.1);
+            border: 2px solid var(--accent);
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .event-badge {
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: white;
+            font-weight: 500;
+        }
+
+        .event-assessment {
+            background: #ff6b6b;
+        }
+
+        .event-deadline {
+            background: #ffa500;
+        }
+
+        .event-work {
+            background: #4ecdc4;
+        }
+
+        .event-class {
+            background: #4a90e2;
+        }
+
+        /* EVENT MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+        }
+
+        .modal-close {
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-light);
+            background: none;
+            border: none;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        /* EVENT LIST */
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .event-item-content {
+            flex: 1;
+        }
+
+        .event-item-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .event-item-meta {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .event-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-top: 3px solid var(--accent);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* NOTIFICATIONS */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+            z-index: 999;
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                gap: 15px;
+                padding: 10px;
+                overflow-x: auto;
+                border-right: none;
+                border-bottom: 3px solid var(--accent);
+            }
+
+            .sidebar-header {
+                flex-shrink: 0;
+                padding: 0;
+                margin: 0;
+                border: none;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                gap: 0;
+                flex-direction: row;
+                overflow-x: auto;
+                flex-shrink: 0;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+                padding: 8px 12px;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 5px;
+            }
+
+            .calendar-day-number {
+                font-size: 12px;
+            }
+
+            .event-badge {
+                font-size: 9px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: auto;
+            margin-left: 15px;
+            margin-right: 15px;
+            width: calc(100% - 30px);
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
+
+        .sidebar-footer {
+            padding: 15px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-page">
+        <div class="login-box">
+            <h1>📚 MSc Study Platform</h1>
+            <p class="subtitle">UCT Masters & UFS Internship</p>
+
+            <label style="display: block; margin-bottom: 15px; font-weight: 600; color: var(--primary);">Select Role:</label>
+            <div class="role-grid">
+                <button class="role-btn active" data-role="student">👨‍🎓 Student</button>
+                <button class="role-btn" data-role="conveyor">👩‍🏫 Conveyor</button>
+                <button class="role-btn" data-role="supervisor">👩‍💼 Supervisor</button>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="passwordInput" required>
+                </div>
+                <button type="submit" class="login-submit">Login</button>
+                <div class="error-msg" id="errorMsg"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="appContainer" class="app-wrapper" style="display: none;">
+        <div class="app-container">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>📚 Platform</h2>
+                    <p>UCT Masters</p>
+                    <div class="user-badge" id="userBadge">Student</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
+                    <div class="nav-item" data-section="calendar">📅 Calendar</div>
+                    <div class="nav-item" data-section="resources">📁 Resources</div>
+                    <div class="nav-item" data-section="assignments">✏️ Assignments</div>
+                    <div class="nav-item" data-section="progress">📈 Progress</div>
+                    <div class="nav-item" data-section="messages">💬 Messages</div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div class="main-content">
+                <div class="topbar">
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <div class="topbar-info">
+                        <span id="userDisplay">Logged in as Student</span>
+                        <span id="dateDisplay"></span>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <!-- DASHBOARD -->
+                    <div class="section active" id="dashboardSection">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-events">0</div>
+                                <div class="stat-label">Calendar Events</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-assignments">0</div>
+                                <div class="stat-label">Active Assignments</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-progress">0%</div>
+                                <div class="stat-label">Overall Progress</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-messages">0</div>
+                                <div class="stat-label">Unread Messages</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">📌 Upcoming Events (Next 7 Days)</div>
+                            <div id="upcomingEventsList" class="events-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- CALENDAR -->
+                    <div class="section" id="calendarSection">
+                        <div class="calendar-wrapper">
+                            <div class="calendar-header">
+                                <h3 id="calendarMonth"></h3>
+                                <div class="calendar-controls">
+                                    <button class="btn btn-secondary btn-small" onclick="previousMonth()">← Prev</button>
+                                    <button class="btn btn-secondary btn-small" onclick="todayMonth()">Today</button>
+                                    <button class="btn btn-secondary btn-small" onclick="nextMonth()">Next →</button>
+                                    <button class="btn btn-primary btn-small" onclick="openEventModal(null)" id="addEventBtn">+ Add Event</button>
+                                </div>
+                            </div>
+
+                            <div class="calendar-grid" id="calendarGrid"></div>
+
+                            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border);">
+                                <h4 style="color: var(--primary); margin-bottom: 15px;">Legend:</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 20px; height: 20px; background: #ff6b6b; border-radius: 3px;"></div>
+                                        <span style="font-size: 13px;">Assessment</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 20px; height: 20px; background: #ffa500; border-radius: 3px;"></div>
+                                        <span style="font-size: 13px;">Deadline</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 20px; height: 20px; background: #4ecdc4; border-radius: 3px;"></div>
+                                        <span style="font-size: 13px;">Work Event</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 20px; height: 20px; background: #4a90e2; border-radius: 3px;"></div>
+                                        <span style="font-size: 13px;">Class</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title">📋 All Events</div>
+                            <div id="allEventsList" class="events-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- RESOURCES -->
+                    <div class="section" id="resourcesSection">
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('lectures')">📊 Lectures</button>
+                            <button class="tab" onclick="switchTab('recordings')">🎥 Recordings</button>
+                            <button class="tab" onclick="switchTab('materials')">📚 Materials</button>
+                        </div>
+
+                        <div class="tab-content active" id="lecturesTab">
+                            <div class="card">
+                                <div id="lectureUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('lectureFile').click()">
+                                        <p>📤 Click to upload lecture slides</p>
+                                    </div>
+                                    <input type="file" id="lectureFile" style="display: none;" onchange="handleFileUpload(event, 'lectures')">
+                                </div>
+                                <div id="lecturesList"></div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="recordingsTab">
+                            <div class="card">
+                                <div id="recordingUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('recordingFile').click()">
+                                        <p>📤 Click to upload recordings</p>
+                                    </div>
+                                    <input type="file" id="recordingFile" style="display: none;" onchange="handleFileUpload(event, 'recordings')">
+                                </div>
+                                <div id="recordingsList"></div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="materialsTab">
+                            <div class="card">
+                                <div id="materialUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('materialFile').click()">
+                                        <p>📤 Click to upload materials</p>
+                                    </div>
+                                    <input type="file" id="materialFile" style="display: none;" onchange="handleFileUpload(event, 'materials')">
+                                </div>
+                                <div id="materialsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ASSIGNMENTS -->
+                    <div class="section" id="assignmentsSection">
+                        <div class="card">
+                            <div class="card-title">✏️ Assignments</div>
+                            <div id="assignmentCreateForm" style="display: none; margin-bottom: 20px; padding: 20px; background: var(--light); border-radius: 8px;">
+                                <input type="text" id="assignTitle" placeholder="Assignment title" class="form-group" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%;">
+                                <textarea id="assignDesc" placeholder="Description" class="form-group" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%; min-height: 80px;"></textarea>
+                                <input type="date" id="assignDue" class="form-group" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%;">
+                                <button class="btn btn-primary" onclick="createAssignment()" style="width: 100%;">Create Assignment</button>
+                            </div>
+                            <div id="assignmentsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- PROGRESS -->
+                    <div class="section" id="progressSection">
+                        <div class="card">
+                            <div class="card-title">📈 Your Progress</div>
+                            <div class="form-group">
+                                <label>Monthly Update</label>
+                                <textarea id="monthlyUpdate" placeholder="Write your progress update..." style="min-height: 120px;" onchange="saveProgress()"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>PTY6027F Progress (%)</label>
+                                <input type="number" id="pty6027" min="0" max="100" value="0" onchange="saveProgress()">
+                            </div>
+                            <div class="form-group">
+                                <label>PTY6028F Progress (%)</label>
+                                <input type="number" id="pty6028" min="0" max="100" value="0" onchange="saveProgress()">
+                            </div>
+                            <div id="supervisorFeedback" style="display: none; margin-top: 20px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid var(--blue);">
+                                <label style="color: var(--blue); font-weight: 600;">📝 Supervisor Feedback</label>
+                                <textarea id="feedbackArea" placeholder="Enter your feedback..." style="margin-top: 10px; min-height: 100px;" onchange="saveProgress()"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MESSAGES -->
+                    <div class="section" id="messagesSection">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="card">
+                                <div class="card-title">💬 Messages with Conveyor</div>
+                                <div id="conveyorMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+                                <div style="display: flex; gap: 10px;">
+                                    <textarea id="conveyorMsg" placeholder="Type message..." style="flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 6px; min-height: 60px;"></textarea>
+                                    <button class="btn btn-primary" onclick="sendMessage('conveyor')">Send</button>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title">💬 Messages with Supervisor</div>
+                                <div id="supervisorMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+                                <div style="display: flex; gap: 10px;">
+                                    <textarea id="supervisorMsg" placeholder="Type message..." style="flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 6px; min-height: 60px;"></textarea>
+                                    <button class="btn btn-primary" onclick="sendMessage('supervisor')">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENT MODAL -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Event</h3>
+                <button class="modal-close" onclick="closeEventModal()">&times;</button>
+            </div>
+
+            <form id="eventForm" onsubmit="saveEvent(event)">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select id="eventType" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="assessment">📌 Assessment</option>
+                        <option value="deadline">⏰ Deadline</option>
+                        <option value="work">💼 Work Event</option>
+                        <option value="class">📚 Class</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" id="eventStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="eventEnd">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDesc" style="min-height: 100px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="eventReminder"> Send reminder notification
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Save Event</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn" style="display: none;" onclick="deleteEvent()">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STATE ====================
+        const PASSWORDS = {
+            student: 'simon2026',
+            conveyor: 'conveyor2026',
+            supervisor: 'dalvie2026'
+        };
+
+        let currentUser = null;
+        let currentMonth = new Date();
+        let currentEditingEvent = null;
+
+        let appState = {
+            events: [],
+            assignments: [],
+            resources: { lectures: [], recordings: [], materials: [] },
+            progress: {},
+            messages: { conveyor: [], supervisor: [] }
+        };
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            setupLoginRoles();
+            checkLoggedIn();
+            updateDate();
+            loadAppState();
+        });
+
+        function setupLoginRoles() {
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // ==================== LOGIN ====================
+        function handleLogin(event) {
+            event.preventDefault();
+            const role = document.querySelector('.role-btn.active').dataset.role;
+            const password = document.getElementById('passwordInput').value;
+
+            if (password === PASSWORDS[role]) {
+                currentUser = role;
+                localStorage.setItem('currentUser', role);
+                showApp();
+            } else {
+                showError('Incorrect password');
+            }
+        }
+
+        function checkLoggedIn() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved && PASSWORDS[saved]) {
+                currentUser = saved;
+                showApp();
+            }
+        }
+
+        function showError(msg) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+            setTimeout(() => errorEl.style.display = 'none', 3000);
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            initApp();
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                location.reload();
+            }
+        }
+
+        // ==================== APP INIT ====================
+        function initApp() {
+            updateUI();
+            setupNavigation();
+            renderCalendar();
+            updateDashboard();
+        }
+
+        function updateUI() {
+            const roles = { student: '👨‍🎓 Simon Mufara', conveyor: '👩‍🏫 Conveyor', supervisor: '👩‍💼 Prof. Dalvie' };
+            document.getElementById('userBadge').textContent = roles[currentUser];
+            document.getElementById('userDisplay').textContent = `Logged in as ${roles[currentUser]}`;
+
+            // Show/hide role-specific features
+            const isConveyor = currentUser === 'conveyor';
+            document.getElementById('lectureUpload').style.display = isConveyor ? 'block' : 'none';
+            document.getElementById('recordingUpload').style.display = isConveyor ? 'block' : 'none';
+            document.getElementById('materialUpload').style.display = isConveyor ? 'block' : 'none';
+            document.getElementById('assignmentCreateForm').style.display = isConveyor ? 'block' : 'none';
+
+            const isSupervisor = currentUser === 'supervisor';
+            document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
+
+            if (currentUser !== 'student') {
+                document.getElementById('monthlyUpdate').disabled = true;
+                document.getElementById('pty6027').disabled = true;
+                document.getElementById('pty6028').disabled = true;
+            }
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    switchSection(section);
+                });
+            });
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + 'Section').classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+            const titles = {
+                dashboard: '📊 Dashboard',
+                calendar: '📅 Calendar',
+                resources: '📁 Resources',
+                assignments: '✏️ Assignments',
+                progress: '📈 Progress',
+                messages: '💬 Messages'
+            };
+
+            document.getElementById('pageTitle').textContent = titles[section];
+
+            if (section === 'calendar') {
+                renderCalendar();
+                renderAllEvents();
+            } else if (section === 'progress') {
+                loadProgress();
+            } else if (section === 'assignments') {
+                loadAssignments();
+            }
+        }
+
+        // ==================== CALENDAR ====================
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            document.getElementById('calendarMonth').textContent =
+                currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            let html = '';
+
+            // Day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(d => {
+                html += `<div class="calendar-day-header">${d}</div>`;
+            });
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="calendar-day other-month">
+                    <div class="calendar-day-number">${daysInPrevMonth - i}</div>
+                </div>`;
+            }
+
+            // Current month days
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const isToday = date.toDateString() === today.toDateString();
+                const dateStr = date.toISOString().split('T')[0];
+                const dayEvents = appState.events.filter(e => e.date === dateStr);
+
+                html += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="openEventModal('${dateStr}')">
+                    <div class="calendar-day-number">${day}</div>
+                    <div class="day-events">`;
+
+                dayEvents.slice(0, 2).forEach(e => {
+                    const color = { assessment: 'event-assessment', deadline: 'event-deadline', work: 'event-work', class: 'event-class' };
+                    html += `<div class="event-badge ${color[e.type] || ''}">${e.title}</div>`;
+                });
+
+                if (dayEvents.length > 2) html += `<div style="font-size: 10px; color: var(--text-light);">+${dayEvents.length - 2} more</div>`;
+
+                html += `</div></div>`;
+            }
+
+            // Next month days
+            const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+            for (let day = 1; day <= totalCells - firstDay - daysInMonth; day++) {
+                html += `<div class="calendar-day other-month">
+                    <div class="calendar-day-number">${day}</div>
+                </div>`;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = html;
+        }
+
+        function previousMonth() {
+            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function todayMonth() {
+            currentMonth = new Date();
+            renderCalendar();
+        }
+
+        // ==================== EVENTS ====================
+        function openEventModal(dateStr = null) {
+            if (currentUser !== 'student' && currentUser !== 'conveyor') return;
+
+            currentEditingEvent = null;
+            document.getElementById('modalTitle').textContent = 'Add Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('deleteEventBtn').style.display = 'none';
+
+            if (dateStr) {
+                document.getElementById('eventStart').value = dateStr;
+                document.getElementById('eventEnd').value = dateStr;
+            }
+
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            currentEditingEvent = null;
+        }
+
+        function saveEvent(e) {
+            e.preventDefault();
+
+            const event = {
+                id: currentEditingEvent ? currentEditingEvent.id : Date.now(),
+                title: document.getElementById('eventTitle').value,
+                type: document.getElementById('eventType').value,
+                date: document.getElementById('eventStart').value,
+                endDate: document.getElementById('eventEnd').value,
+                description: document.getElementById('eventDesc').value,
+                createdBy: currentUser,
+                reminder: document.getElementById('eventReminder').checked
+            };
+
+            if (currentEditingEvent) {
+                const idx = appState.events.findIndex(e => e.id === currentEditingEvent.id);
+                if (idx >= 0) appState.events[idx] = event;
+            } else {
+                appState.events.push(event);
+            }
+
+            saveAppState();
+            closeEventModal();
+            renderCalendar();
+            renderAllEvents();
+            updateDashboard();
+            notify('✅ Event saved!');
+        }
+
+        function deleteEvent() {
+            if (!currentEditingEvent) return;
+            if (!confirm('Delete this event?')) return;
+
+            appState.events = appState.events.filter(e => e.id !== currentEditingEvent.id);
+            saveAppState();
+            closeEventModal();
+            renderCalendar();
+            renderAllEvents();
+            updateDashboard();
+            notify('Event deleted');
+        }
+
+        function renderAllEvents() {
+            const sorted = [...appState.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+            let html = sorted.length ? sorted.map(e => `
+                <div class="event-item">
+                    <div class="event-item-content">
+                        <div class="event-item-title">${e.title}</div>
+                        <div class="event-item-meta">
+                            📅 ${new Date(e.date).toLocaleDateString()} |
+                            <span style="display: inline-block; padding: 2px 6px; background: var(--light); border-radius: 3px; margin: 0 4px;">
+                                ${e.type}
+                            </span>
+                            Created by: ${e.createdBy}
+                        </div>
+                    </div>
+                    ${(currentUser === 'conveyor' || currentUser === e.createdBy) ? `
+                        <button class="btn btn-primary btn-small" onclick="editEvent(${e.id})">Edit</button>
+                    ` : ''}
+                </div>
+            `).join('') : '<p style="color: var(--text-light); font-size: 13px;">No events yet</p>';
+
+            document.getElementById('allEventsList').innerHTML = html;
+        }
+
+        function editEvent(id) {
+            const event = appState.events.find(e => e.id === id);
+            if (!event) return;
+
+            currentEditingEvent = event;
+            document.getElementById('modalTitle').textContent = 'Edit Event';
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventType').value = event.type;
+            document.getElementById('eventStart').value = event.date;
+            document.getElementById('eventEnd').value = event.endDate;
+            document.getElementById('eventDesc').value = event.description;
+            document.getElementById('eventReminder').checked = event.reminder;
+            document.getElementById('deleteEventBtn').style.display = 'block';
+
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+        // ==================== ASSIGNMENTS ====================
+        function createAssignment() {
+            const title = document.getElementById('assignTitle').value;
+            const desc = document.getElementById('assignDesc').value;
+            const due = document.getElementById('assignDue').value;
+
+            if (!title || !desc || !due) return alert('Fill all fields');
+
+            appState.assignments.push({
+                id: Date.now(),
+                title,
+                description: desc,
+                dueDate: due,
+                status: 'active',
+                createdDate: new Date().toLocaleDateString()
+            });
+
+            document.getElementById('assignTitle').value = '';
+            document.getElementById('assignDesc').value = '';
+            document.getElementById('assignDue').value = '';
+
+            saveAppState();
+            loadAssignments();
+            updateDashboard();
+            notify('✅ Assignment created!');
+        }
+
+        function loadAssignments() {
+            let html = appState.assignments.length ? appState.assignments.map(a => `
+                <div class="event-item" style="border-left-color: var(--warning);">
+                    <div class="event-item-content">
+                        <div class="event-item-title">${a.title}</div>
+                        <div class="event-item-meta">Due: ${new Date(a.dueDate).toLocaleDateString()} | Status: ${a.status}</div>
+                        <div style="margin-top: 8px; font-size: 13px; color: var(--text);">${a.description}</div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: var(--text-light);">No assignments</p>';
+
+            document.getElementById('assignmentsList').innerHTML = html;
+        }
+
+        // ==================== PROGRESS ====================
+        function saveProgress() {
+            appState.progress = {
+                monthlyUpdate: document.getElementById('monthlyUpdate').value,
+                pty6027: document.getElementById('pty6027').value,
+                pty6028: document.getElementById('pty6028').value,
+                supervisorFeedback: document.getElementById('feedbackArea').value
+            };
+            saveAppState();
+            updateDashboard();
+            notify('✅ Progress saved!');
+        }
+
+        function loadProgress() {
+            const p = appState.progress || {};
+            document.getElementById('monthlyUpdate').value = p.monthlyUpdate || '';
+            document.getElementById('pty6027').value = p.pty6027 || 0;
+            document.getElementById('pty6028').value = p.pty6028 || 0;
+            document.getElementById('feedbackArea').value = p.supervisorFeedback || '';
+        }
+
+        // ==================== MESSAGES ====================
+        function sendMessage(recipient) {
+            const input = document.getElementById(recipient + 'Msg');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appState.messages[recipient].push({
+                sender: currentUser,
+                content: msg,
+                timestamp: new Date().toLocaleString()
+            });
+
+            input.value = '';
+            saveAppState();
+            loadMessages(recipient);
+            notify('📨 Message sent!');
+        }
+
+        function loadMessages(recipient) {
+            const msgs = appState.messages[recipient] || [];
+            let html = msgs.map(m => `
+                <div class="event-item">
+                    <div class="event-item-content">
+                        <div class="event-item-title">${m.sender}</div>
+                        <div class="event-item-meta">${m.timestamp}</div>
+                        <div style="margin-top: 8px; color: var(--text);">${m.content}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById(recipient + 'Messages').innerHTML = html || '<p style="color: var(--text-light);">No messages</p>';
+        }
+
+        // ==================== DASHBOARD ====================
+        function updateDashboard() {
+            const upcomingDays = 7;
+            const today = new Date();
+            const upcoming = appState.events
+                .filter(e => {
+                    const eDate = new Date(e.date);
+                    return eDate >= today && eDate <= new Date(today.getTime() + upcomingDays * 24 * 60 * 60 * 1000);
+                })
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            document.getElementById('stat-events').textContent = appState.events.length;
+            document.getElementById('stat-assignments').textContent = appState.assignments.length;
+            document.getElementById('stat-messages').textContent =
+                (appState.messages.conveyor || []).length + (appState.messages.supervisor || []).length;
+
+            const p = appState.progress || {};
+            const avg = p.pty6027 && p.pty6028 ? Math.round((parseInt(p.pty6027) + parseInt(p.pty6028)) / 2) : 0;
+            document.getElementById('stat-progress').textContent = avg + '%';
+
+            document.getElementById('upcomingEventsList').innerHTML = upcoming.length ? upcoming.map(e => `
+                <div class="event-item">
+                    <div class="event-item-content">
+                        <div class="event-item-title">${e.title}</div>
+                        <div class="event-item-meta">📅 ${new Date(e.date).toLocaleDateString()} | ${e.type}</div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: var(--text-light);">No upcoming events in the next 7 days</p>';
+        }
+
+        // ==================== UTILITIES ====================
+        function updateDate() {
+            const now = new Date();
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function notify(msg) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = msg;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll(`.tab-content`).forEach(t => t.classList.remove('active'));
+            document.querySelectorAll(`.tab`).forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function handleFileUpload(e, type) {
+            const files = e.target.files;
+            if (!files.length) return;
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (!appState.resources[type]) appState.resources[type] = [];
+                    appState.resources[type].push({
+                        name: file.name,
+                        size: (file.size / 1024 / 1024).toFixed(2),
+                        date: new Date().toLocaleDateString(),
+                        data: ev.target.result
+                    });
+                    saveAppState();
+                    loadResources();
+                    notify(`✅ ${file.name} uploaded!`);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            e.target.value = '';
+        }
+
+        function loadResources() {
+            ['lectures', 'recordings', 'materials'].forEach(type => {
+                const files = appState.resources[type] || [];
+                const html = files.length ? files.map((f, i) => `
+                    <div class="event-item">
+                        <div class="event-item-content">
+                            <div class="event-item-title">📄 ${f.name}</div>
+                            <div class="event-item-meta">${f.size} MB • ${f.date}</div>
+                        </div>
+                        <button class="btn btn-primary btn-small" onclick="downloadFile('${f.data}', '${f.name}')">Download</button>
+                        ${currentUser === 'conveyor' ? `<button class="btn btn-danger btn-small" onclick="deleteFile('${type}', ${i})">Delete</button>` : ''}
+                    </div>
+                `).join('') : '<p style="color: var(--text-light);">No files</p>';
+
+                document.getElementById(type + 'List').innerHTML = html;
+            });
+        }
+
+        function downloadFile(data, name) {
+            const link = document.createElement('a');
+            link.href = data;
+            link.download = name;
+            link.click();
+        }
+
+        function deleteFile(type, idx) {
+            appState.resources[type].splice(idx, 1);
+            saveAppState();
+            loadResources();
+        }
+
+        // ==================== STORAGE ====================
+        function saveAppState() {
+            localStorage.setItem('appState', JSON.stringify(appState));
+        }
+
+        function loadAppState() {
+            const saved = localStorage.getItem('appState');
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading state');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
