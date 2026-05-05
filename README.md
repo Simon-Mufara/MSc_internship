@@ -1,5 +1,5 @@
 # 📚 MSc Dashboard Platform - Complete Setup Guide
-
+https://simon-mufara.github.io/MSc_internship/
 ## What's New? ✨
 
 This is a **completely rebuilt platform** with:
