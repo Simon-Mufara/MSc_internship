@@ -34,3 +34,12 @@ logs/
 tmp/
 temp/
 .cache/
+
+# Database files (local development)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Installation logs
+npm-install.log
