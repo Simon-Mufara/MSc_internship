@@ -62,60 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
 });
 
-function checkAuthentication() {
-  if (isAuthenticated()) {
-    currentUser = getUsername();
-    currentUserRole = getRole();
-    showApp();
-    initApp();
-  }
-}
-
-function setupEventListeners() {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function() {
-      switchSection(this.dataset.section);
-    });
-  });
-}
-
-async function handleLogin(event) {
-  event.preventDefault();
-  const username = document.getElementById('usernameInput').value;
-  const password = document.getElementById('passwordInput').value;
-
-  try {
-    if (!username || !password) {
-      showError('Please enter username and password');
-      return;
-    }
-    
-    console.log('Attempting login for:', username);
-    const result = await api.auth.login(username, password);
-    console.log('Login successful:', result);
-    
-    if (!result.user) {
-      throw new Error('No user data returned from server');
-    }
-    
-    currentUser = result.user.username;
-    currentUserRole = result.user.role;
-    console.log('User logged in as:', currentUser, 'with role:', currentUserRole);
-    showApp();
-    initApp();
-  } catch (error) {
-    console.error('Login error:', error);
-    const errorMsg = error.message || 'Login failed';
-    if (errorMsg.includes('fetch')) {
-      showError('Cannot connect to server. Make sure the server is running.');
-    } else if (errorMsg.includes('401') || errorMsg.includes('Invalid')) {
-      showError('Invalid username or password');
-    } else {
-      showError(errorMsg);
-    }
-  }
-}
-
 async function handleLogout() {
   if (confirm('Logout?')) {
     await api.auth.logout();
@@ -907,94 +853,20 @@ async function updateDashboard() {
 
 // PORTFOLIO
 async function loadPortfolio() {
-  try {
-    // Load current user's portfolio if student, otherwise load simon's
-    const author = currentUserRole === 'student' ? currentUser : 'simon';
-    const entries = await api.portfolio.getByAuthor(author);
-    
-    let html = '';
-    if (currentUserRole === 'student') {
-      // Student view: show input and list
-      html = `
-        <div class="card" style="margin-bottom: 20px;">
-          <div class="card-title">✍️ Write New Portfolio Entry</div>
-          <div class="form-group">
-            <label>Entry Date</label>
-            <input type="date" id="portfolioDate" value="${new Date().toISOString().split('T')[0]}">
-          </div>
-          <div class="form-group">
-            <label>Title</label>
-            <input type="text" id="portfolioTitle" placeholder="Entry title">
-          </div>
-          <div class="form-group">
-            <label>What did you accomplish today?</label>
-            <textarea id="portfolioContent" placeholder="Write your daily portfolio entry..." style="min-height: 150px;"></textarea>
-          </div>
-          <button class="btn btn-primary" onclick="savePortfolioEntry()">Save Entry</button>
-        </div>
-      `;
-    }
-    
-    html += `
-      <div class="card">
-        <div class="card-title">${author === 'simon' ? "📓 Simon's Portfolio" : '📓 My Portfolio'}</div>
-        <div style="margin-bottom: 15px; padding: 12px; background: var(--light); border-radius: 6px; font-size: 12px; color: var(--text-light);">
-          ${currentUserRole !== 'student' ? `Portfolio entries from Simon for tracking daily progress` : 'Track your daily activities and accomplishments'}
-        </div>
-        <div id="portfolioEntries">${entries.length ? '' : '<p style="color: var(--text-light);">No portfolio entries yet</p>'}</div>
+  const portfolioSection = document.getElementById('portfolioSection');
+  if (!portfolioSection) return;
+
+  portfolioSection.innerHTML = `
+    <div class="card">
+      <div class="card-title">📓 Research Command Centre</div>
+      <div style="margin-bottom: 14px; padding: 12px; background: var(--light); border-radius: 6px; font-size: 12px; color: var(--text-light); line-height: 1.6;">
+        Embedded research dashboard page. It includes the custom command centre layout, tabs, and weekly planning board you provided.
       </div>
-    `;
-    
-    document.getElementById('portfolioSection').innerHTML = html;
-    
-    // Render entries
-    if (entries.length > 0) {
-      document.getElementById('portfolioEntries').innerHTML = entries.map((e, i) => `
-        <div class="event-item" style="border-left-color: var(--primary);">
-          <div class="event-item-content">
-            <div class="event-item-title">${e.title}</div>
-            <div class="event-item-meta">📅 ${new Date(e.entry_date).toLocaleDateString()} | Posted ${new Date(e.created_at).toLocaleDateString()}</div>
-            <div style="margin-top: 12px; padding: 12px; background: var(--light); border-radius: 6px; line-height: 1.6;">${e.content}</div>
-          </div>
-          ${currentUserRole === 'student' ? `<button class="btn btn-danger btn-small" onclick="deletePortfolioEntry(${e.id})">Delete</button>` : ''}
-        </div>
-      `).join('');
-    }
-  } catch (error) {
-    console.error('Error loading portfolio:', error);
-    document.getElementById('portfolioSection').innerHTML = `<p style="color: red;">Error loading portfolio: ${error.message}</p>`;
-  }
-}
-
-async function savePortfolioEntry() {
-  const title = document.getElementById('portfolioTitle').value.trim();
-  const content = document.getElementById('portfolioContent').value.trim();
-  const entry_date = document.getElementById('portfolioDate').value;
-  
-  if (!title || !content || !entry_date) {
-    notify('Please fill in all fields', 'error');
-    return;
-  }
-  
-  try {
-    await api.portfolio.create(title, content, entry_date);
-    notify('✅ Portfolio entry saved!');
-    document.getElementById('portfolioTitle').value = '';
-    document.getElementById('portfolioContent').value = '';
-    await loadPortfolio();
-  } catch (error) {
-    notify(`Error: ${error.message}`, 'error');
-  }
-}
-
-async function deletePortfolioEntry(id) {
-  if (!confirm('Delete this entry?')) return;
-  
-  try {
-    await api.portfolio.delete(id);
-    notify('✅ Entry deleted');
-    await loadPortfolio();
-  } catch (error) {
-    notify(`Error: ${error.message}`, 'error');
-  }
+      <iframe
+        src="../research_command_centre.html"
+        title="Research Command Centre"
+        style="width: 100%; min-height: 1100px; border: 1px solid var(--border); border-radius: 10px; background: #fff;"
+      ></iframe>
+    </div>
+  `;
 }

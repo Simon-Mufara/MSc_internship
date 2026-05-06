@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simon Mufara — Research Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #080d12;
+    --bg-deep: #0d1520;
+    --bg-card: #111c2a;
+    --bg-hover: #162236;
+    --bg-active: #1a2d42;
+    --border: rgba(45, 90, 130, 0.35);
+    --border-bright: rgba(45, 160, 200, 0.5);
+    --teal: #22d3ee;
+    --teal-dim: #0e7490;
+    --teal-glow: rgba(34, 211, 238, 0.12);
+    --amber: #f59e0b;
+    --amber-dim: #92400e;
+    --amber-glow: rgba(245, 158, 11, 0.1);
+    --green: #34d399;
+    --green-dim: #065f46;
+    --green-glow: rgba(52, 211, 153, 0.1);
+    --rose: #fb7185;
+    --rose-dim: #9f1239;
+    --rose-glow: rgba(251, 113, 133, 0.1);
+    --violet: #a78bfa;
+    --violet-glow: rgba(167, 139, 250, 0.1);
+    --text-primary: #e2f0fb;
+    --text-secondary: #8ab4cc;
+    --text-muted: #4a7a96;
+    --text-accent: #22d3ee;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+    --synced-glow: 0 0 0 2px rgba(34, 211, 238, 0.6), 0 0 20px rgba(34, 211, 238, 0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-void);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(14, 116, 144, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 90%, rgba(34, 211, 238, 0.04) 0%, transparent 50%);
+  }
+
+  .header {
+    padding: 28px 40px 22px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8, 13, 18, 0.9);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .header-badge {
+    width: 42px; height: 42px;
+    border: 1.5px solid var(--teal-dim);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--teal);
+    background: rgba(34, 211, 238, 0.06);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+  .header-sub {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .header-right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .header-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .tag-uct { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-glow); }
+  .tag-ufs { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
+  .tag-dsi { color: var(--green); border-color: var(--green-dim); background: var(--green-glow); }
+
+  .tab-nav {
+    display: flex;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-void);
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    padding: 14px 20px 13px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+    top: 1px;
+  }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+  }
+  .tab-btn .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+    position: relative; top: -1px;
+  }
+
+  .tab-panel { display: none; padding: 36px 40px 60px; max-width: 1300px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 36px 0;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover { border-color: var(--border-bright); background: var(--bg-hover); }
+  .card.synced { box-shadow: var(--synced-glow); border-color: rgba(34, 211, 238, 0.5); }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .alert-violet {
+    background: var(--violet-glow);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--violet);
+  }
+  .alert-amber {
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: var(--amber);
+  }
+  .alert-teal {
+    background: var(--teal-glow);
+    border: 1px solid rgba(34,211,238,0.3);
+    color: var(--teal);
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    border: 1px solid;
+    margin: 2px 2px 2px 0;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .tag-skill { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-glow); }
+  .tag-gap { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
+  .tag-deliverable { color: var(--green); border-color: var(--green-dim); background: var(--green-glow); }
+  .tag-experimental { color: var(--violet); border-color: rgba(167,139,250,0.4); background: var(--violet-glow); }
+  .tag-msc { color: var(--rose); border-color: var(--rose-dim); background: var(--rose-glow); }
+
+  .sync-hint {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal-dim);
+    padding: 6px 12px;
+    border: 1px dashed var(--teal-dim);
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 20px;
+    cursor: default;
+  }
+  .sync-hint::before { content: '⟳  '; }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 8px; bottom: 8px;
+    width: 1.5px;
+    background: linear-gradient(180deg, var(--teal), var(--amber), var(--green));
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 16px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    background: var(--bg-void);
+  }
+  .tl-time {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .tl-title { font-weight: 600; color: var(--text-primary); font-size: 13.5px; margin-bottom: 5px; }
+  .tl-body { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
+
+  .deliverable {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .deliverable-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13, 21, 32, 0.5);
+  }
+  .deliverable-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--bg-void);
+    background: var(--teal);
+    border-radius: 6px;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .deliverable-title { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+  .deliverable-body { padding: 16px 20px; color: var(--text-secondary); font-size: 12.5px; line-height: 1.65; }
+  .deliverable-connects {
+    padding: 10px 20px 16px;
+    display: flex; gap: 8px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .connects-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 4px;
+  }
+
+  .platform-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+  .platform-card:hover { border-color: var(--border-bright); }
+  .platform-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .platform-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .platform-url {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal-dim);
+  }
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+  .live-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .platform-body { padding: 16px 20px; color: var(--text-secondary); font-size: 12.5px; line-height: 1.65; }
+
+  .obj-item {
+    display: flex;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .obj-item:hover { border-color: var(--border-bright); background: var(--bg-hover); }
+  .obj-item.synced { box-shadow: var(--synced-glow); }
+  .obj-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    min-width: 28px;
+    padding-top: 2px;
+    font-weight: 700;
+  }
+  .obj-title { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; font-size: 13.5px; }
+  .obj-desc { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
+
+  .skill-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .skill-row:hover { background: var(--bg-hover); }
+  .skill-row.synced { background: rgba(34,211,238,0.06); }
+  .skill-row.header-row { background: var(--bg-card); cursor: default; }
+  .skill-row.header-row:hover { background: var(--bg-card); }
+  .skill-cell {
+    padding: 13px 16px;
+    border-right: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+  .skill-cell:last-child { border-right: none; }
+  .skill-name { color: var(--text-primary); font-weight: 500; }
+  .skill-tool {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal-dim);
+    margin-top: 2px;
+  }
+  .matrix-header {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+  .relevance-bar { height: 4px; border-radius: 2px; margin-top: 6px; background: var(--border); overflow: hidden; }
+  .relevance-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+  .fill-teal { background: var(--teal); }
+
+  .gap-table { width: 100%; border-collapse: collapse; }
+  .gap-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .gap-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  .gap-table tr:hover td { background: var(--bg-hover); }
+  .gap-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    display: inline-block;
+  }
+  .gap-high { color: var(--rose); border-color: var(--rose-dim); background: var(--rose-glow); }
+  .gap-med { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
+
+  .progress-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .progress-row:last-child { border-bottom: none; }
+  .progress-label { font-size: 12.5px; color: var(--text-secondary); flex: 1; }
+  .progress-track { width: 140px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+  .progress-fill { height: 100%; border-radius: 3px; }
+  .progress-pct { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); min-width: 32px; text-align: right; }
+
+  @media (max-width: 780px) {
+    .header { padding: 18px 20px; }
+    .tab-panel { padding: 24px 20px 50px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .skill-row { grid-template-columns: 1fr; }
+    .skill-row .skill-cell:not(:first-child) { border-top: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="header-badge">SM</div>
+    <div>
+      <div class="header-title">Research Command Centre</div>
+      <div class="header-sub">Simon Mufara · MSc Computational Health Informatics · UCT / UFS-NGS</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-tag tag-uct">UCT CBIO</span>
+    <span class="header-tag tag-ufs">UFS-NGS Intern</span>
+    <span class="header-tag tag-dsi">DSI-NRF Scholar</span>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('msc', this)"><span class="dot" style="background:var(--rose)"></span>MSc Proposal</button>
+  <button class="tab-btn" onclick="switchTab('experimental', this)"><span class="dot" style="background:var(--violet)"></span>Experimental Design Bridge</button>
+  <button class="tab-btn" onclick="switchTab('ufs', this)"><span class="dot" style="background:var(--amber)"></span>UFS Contribution</button>
+  <button class="tab-btn" onclick="switchTab('skills', this)"><span class="dot" style="background:var(--teal)"></span>Skills Matrix</button>
+  <button class="tab-btn" onclick="switchTab('roadmap', this)"><span class="dot" style="background:var(--green)"></span>Unified Roadmap</button>
+  <button class="tab-btn" onclick="switchTab('action', this)" style="position:relative"><span class="dot" style="background:#f97316"></span>Action Plan</button>
+</nav>
+
+<div id="tab-msc" class="tab-panel active">
+  <div class="section-label">UCT Division of Computational Biology</div>
+  <div class="section-title">An Interactive & Reproducible Bioinformatics Platform for CBIO</div>
+  <div class="section-subtitle">Bridging the computational access divide in African genomics through web-based scRNA-seq and omics analysis — with a roadmap for AI-augmented research and experimentally-informed analytical design.</div>
+  <div class="alert alert-violet"><span class="alert-icon">🔬</span><span><strong>Wetlab Feedback Incorporated:</strong> Your colleague's feedback on experimental design has been integrated as a core research contribution — not just a caveat. The platform now explicitly addresses how upstream wet-lab decisions (dissociation protocols, batch design, replicate structure) should inform computational QC thresholds and parameter choices. See the <strong>Experimental Design Bridge</strong> tab for the full framework.</span></div>
+  <div style="margin-bottom:28px"><div class="section-label" style="margin-bottom:12px">Production-Deployed Platforms</div><div class="grid-2"><div class="platform-card"><div class="platform-header"><div><div class="platform-name">scRNA-seq Clinical Explorer</div><div class="platform-url">scrna-analysis.streamlit.app</div></div><div class="live-dot">LIVE</div></div><div class="platform-body">Eight-stage guided pipeline: data upload and validation → quality control → normalisation & scaling → dimensionality reduction (PCA) → neighbourhood graph → Leiden clustering → UMAP visualisation → cell type annotation and automated report generation. Biology-first QC design with real-time cell count projections.<div style="margin-top:12px"><span class="tag tag-skill">Scanpy</span><span class="tag tag-skill">Docker</span><span class="tag tag-skill">Streamlit</span><span class="tag tag-skill">Leiden</span><span class="tag tag-skill">scANVI</span><span class="tag tag-experimental">QC-Aware</span></div></div></div><div class="platform-card"><div class="platform-header"><div><div class="platform-name">Variant Analysis Suite</div><div class="platform-url">simon-variants.streamlit.app</div></div><div class="live-dot">LIVE</div></div><div class="platform-body">Multi-sample VCF processing with SnpEff functional annotation, ClinVar integration, and African-contextualised ACMG-lite pathogenicity classification. First open-source implementation explicitly flagging European-ancestry gnomAD bias for African population variants. NHLS-aligned clinical reporting.<div style="margin-top:12px"><span class="tag tag-skill">SnpEff</span><span class="tag tag-skill">ClinVar</span><span class="tag tag-skill">ACMG-lite</span><span class="tag tag-skill">gnomAD-AFR</span><span class="tag tag-skill">scikit-allel</span></div></div></div></div></div>
+  <div style="margin-bottom:28px"><div class="section-label" style="margin-bottom:10px">Eight-Stage scRNA-seq Pipeline</div><div class="card"><div class="card-title">Pipeline overview</div><div style="color:var(--text-secondary)">This standalone dashboard is embedded in the portfolio tab of the main site.</div></div></div>
+</div>
+
+<div id="tab-experimental" class="tab-panel"><div class="section-label">Wetlab Colleague Feedback — Research Direction Shaper</div><div class="section-title">Experimental Design: What Bioinformaticians Often Miss</div><div class="section-subtitle">Your wetlab colleague's feedback was not a critique — it was a research contribution.</div></div>
+<div id="tab-ufs" class="tab-panel"><div class="section-label">UFS-NGS Unit, Bloemfontein — Internship Contribution Plan</div><div class="section-title">Rotavirus Genomics & Respiratory Surveillance</div><div class="section-subtitle">Prof. Martin Nyaga's unit holds WHO Collaborating Centre status.</div></div>
+<div id="tab-skills" class="tab-panel"><div class="section-label">Cross-Context Skill Mapping</div><div class="section-title">Your Skills — Mapped to MSc & UFS Simultaneously</div><div class="section-subtitle">Every tool and method you already deploy maps to at least one MSc objective and at least one UFS contribution.</div></div>
+<div id="tab-roadmap" class="tab-panel"><div class="section-label">Integrated Research Timeline</div><div class="section-title">MSc + UFS Internship — One Coherent Research Identity</div><div class="section-subtitle">This roadmap shows how your UCT MSc milestones and UFS-NGS internship deliverables run in parallel.</div></div>
+<div id="tab-action" class="tab-panel"><div class="section-label">Operational Planning — Week by Week</div><div class="section-title">What You Need to Do, and When</div><div class="section-subtitle">You are in Week 1 at UFS (May 2026). Everything below is sequenced so that each step unlocks the next.</div></div>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
