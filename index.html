@@ -1111,6 +1111,8 @@
             messages: { conveyor: [], supervisor: [] }
         };
 
+        let messagePollId = null;
+
         const examTimetable = [
             { title: 'IBS6024F - Biocomputing', type: 'assessment', date: '2026-06-01', description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilator: Hocine Bendou' },
             { title: 'IBS6025F - Bioinformatic Programming with Python', type: 'assessment', date: '2026-06-03', description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilators: Hocine Bendou, Shareefa Dalvie' },
@@ -1243,12 +1245,25 @@
             if (section === 'calendar') {
                 renderCalendar();
                 renderAllEvents();
+                if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
             } else if (section === 'progress') {
                 loadProgress();
+                if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
             } else if (section === 'assignments') {
                 loadAssignments();
+                if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
             } else if (section === 'projects') {
                 loadProjects();
+                if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
+            } else if (section === 'messages') {
+                loadMessages('conveyor');
+                loadMessages('supervisor');
+                if (!messagePollId) {
+                    messagePollId = setInterval(() => {
+                        loadMessages('conveyor');
+                        loadMessages('supervisor');
+                    }, 3000);
+                }
             }
         }
 

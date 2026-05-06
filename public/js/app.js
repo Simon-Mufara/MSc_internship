@@ -9,6 +9,8 @@ let appData = {
   messages: {}
 };
 
+let messagePollId = null;
+
 let localLibrary = {
   resources: { lectures: [], recordings: [], materials: [] },
   projects: []
@@ -284,17 +286,30 @@ async function switchSection(section) {
   if (section === 'calendar') {
     renderCalendar();
     await renderAllEvents();
+    // stop messages polling when leaving messages
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'progress') {
     await loadProgress();
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'assignments') {
     await loadAssignments();
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'resources') {
     await loadResources();
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'projects') {
     await renderProjects();
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'messages') {
     await loadMessages('conveyor');
     await loadMessages('supervisor');
+    // start polling messages for real-time-ish sync
+    if (!messagePollId) {
+      messagePollId = setInterval(() => {
+        loadMessages('conveyor');
+        loadMessages('supervisor');
+      }, 3000);
+    }
   }
 }
 
