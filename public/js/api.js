@@ -295,7 +295,7 @@ function createMockApi() {
         if (password === user.password) {
           const token = makeMockToken(username);
           setAuthToken(token);
-          return { token };
+          return { token, user: { username, role: 'student' } };
         }
         throw new Error('Invalid credentials (mock)');
       },
