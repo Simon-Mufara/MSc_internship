@@ -115,6 +115,50 @@ function initializeDefaultUsers() {
   });
 
   const examEvents = [
+    // Weekly Classes & Lectures (repeating pattern)
+    {
+      title: 'IBS6024F Lecture - Biocomputing',
+      type: 'class',
+      date: '2026-05-13',
+      description: 'Time: 10:00am-12:00pm | Venue: Lecture Room A | Instructor: Hocine Bendou'
+    },
+    {
+      title: 'IBS6025F Lecture - Bioinformatic Programming',
+      type: 'class',
+      date: '2026-05-14',
+      description: 'Time: 2:00pm-4:00pm | Venue: Lab Room 3 | Instructor: Shareefa Dalvie'
+    },
+    {
+      title: 'IBS6026F Lecture - Machine Learning',
+      type: 'class',
+      date: '2026-05-15',
+      description: 'Time: 10:00am-12:00pm | Venue: Lecture Room B | Instructor: Musalula Sinkala'
+    },
+    {
+      title: 'PTY6027F Lecture - Omics Data Mining',
+      type: 'class',
+      date: '2026-05-13',
+      description: 'Time: 2:00pm-4:00pm | Venue: Lecture Room C | Instructor: Shareefa Dalvie'
+    },
+    {
+      title: 'PTY6028F Lecture - Omics Data Generation',
+      type: 'class',
+      date: '2026-05-20',
+      description: 'Time: 10:00am-12:00pm | Venue: Lab Room 1 | Instructor: Shareefa Dalvie'
+    },
+    {
+      title: 'Supervision Session - Simon',
+      type: 'class',
+      date: '2026-05-16',
+      description: 'Time: 3:00pm-4:00pm | Venue: Office Martin | Supervisor: Martin (UFS)'
+    },
+    {
+      title: 'Lab Session - Bioinformatics Tools',
+      type: 'class',
+      date: '2026-05-22',
+      description: 'Time: 1:00pm-3:00pm | Venue: Computer Lab 2 | Instructor: Dalvie'
+    },
+    // Exam Events
     {
       title: 'IBS6024F - Biocomputing',
       type: 'assessment',
