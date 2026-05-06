@@ -277,8 +277,8 @@ function parseDateOnly(dateString) {
 function updateUI() {
   const roleNames = {
     student: `👨‍🎓 ${currentUser}`,
-    conveyor: '👩‍🏫 Prof. Dalvie',
-    supervisor: '👩‍💼 Prof. Martin'
+    conveyor: '👩‍🏫 Dalvie (UCT Conveyor)',
+    supervisor: '👩‍💼 Martin (UFS Supervisor)'
   };
 
   document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;

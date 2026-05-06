@@ -94,8 +94,8 @@ function initDatabase() {
 function initializeDefaultUsers() {
   const users = [
     { username: 'simon', role: 'student', password: 'simon2026' },
-    { username: 'conveyor', role: 'conveyor', password: 'dalvie2026' },
-    { username: 'dalvie', role: 'supervisor', password: 'martin2026' }
+    { username: 'dalvie', role: 'conveyor', password: 'dalvie2026' },
+    { username: 'martin', role: 'supervisor', password: 'martin2026' }
   ];
 
   users.forEach(user => {

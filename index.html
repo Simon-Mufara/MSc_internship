@@ -1192,19 +1192,19 @@
         }
 
         function updateUI() {
-            const roles = { student: '👨‍🎓 Simon Mufara', conveyor: '👩‍🏫 Prof. Dalvie', supervisor: '👩‍💼 Prof. Martin' };
+            const roles = { student: '👨‍🎓 Simon', dalvie: '👩‍🏫 Dalvie (UCT Conveyor)', martin: '👩‍💼 Martin (UFS Supervisor)' };
             document.getElementById('userBadge').textContent = roles[currentUser];
             document.getElementById('userDisplay').textContent = `Logged in as ${roles[currentUser]}`;
 
-            // Show/hide role-specific features
-            const canAddContent = currentUser === 'conveyor' || currentUser === 'supervisor';
+            // Show/hide role-specific features (dalvie and martin can add content)
+            const canAddContent = currentUser === 'dalvie' || currentUser === 'martin';
             document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
             document.getElementById('recordingUpload').style.display = canAddContent ? 'block' : 'none';
             document.getElementById('materialUpload').style.display = canAddContent ? 'block' : 'none';
             document.getElementById('projectUpload').style.display = canAddContent ? 'block' : 'none';
             document.getElementById('assignmentCreateForm').style.display = canAddContent ? 'block' : 'none';
 
-            const isSupervisor = currentUser === 'supervisor';
+            const isSupervisor = currentUser === 'martin';
             document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
 
             if (currentUser !== 'student') {

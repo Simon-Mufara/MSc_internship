@@ -54,11 +54,11 @@ Go to: **http://localhost:5000**
 
 ## 🔐 Test Login Credentials
 
-| Role | Password |
-|------|----------|
-| Student | `simon2026` |
-| Conveyor | `dalvie2026` |
-| Supervisor | `martin2026` |
+| Role | Username | Password |
+|------|----------|----------|
+| Student | `simon` | `simon2026` |
+| Conveyor (UCT) | `dalvie` | `dalvie2026` |
+| Supervisor (UFS) | `martin` | `martin2026` |
 
 ---
 
