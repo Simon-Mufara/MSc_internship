@@ -163,9 +163,11 @@ function saveLocalLibrary() {
 }
 
 function getResearchPdfUrl() {
-  return window.location.protocol === 'file:'
-    ? 'public/research_focus.pdf'
-    : '/research_focus.pdf';
+  if (window.location.protocol === 'file:' || window.location.hostname.includes('github.io')) {
+    return 'public/research_focus.pdf';
+  }
+
+  return '/research_focus.pdf';
 }
 
 function ensureDefaultResearchProject() {
