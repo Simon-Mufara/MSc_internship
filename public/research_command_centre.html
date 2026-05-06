@@ -32,9 +32,9 @@
     --text-secondary: #8ab4cc;
     --text-muted: #4a7a96;
     --text-accent: #22d3ee;
-    --font-display: 'DM Serif Display', Georgia, serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --font-body: 'Outfit', sans-serif;
+    --font-display: "DM Serif Display", Georgia, serif;
+    --font-mono: "JetBrains Mono", monospace;
+    --font-body: "Outfit", sans-serif;
     --synced-glow: 0 0 0 2px rgba(34, 211, 238, 0.6), 0 0 20px rgba(34, 211, 238, 0.2);
   }
 
@@ -100,9 +100,7 @@
     margin-top: 3px;
   }
 
-  .header-right {
-    display: flex; gap: 8px; flex-wrap: wrap;
-  }
+  .header-right { display: flex; gap: 8px; flex-wrap: wrap; }
 
   .header-tag {
     font-family: var(--font-mono);
@@ -183,11 +181,6 @@
     max-width: 760px;
     margin-bottom: 32px;
   }
-  .section-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 36px 0;
-  }
 
   .card {
     background: var(--bg-card);
@@ -195,11 +188,8 @@
     border-radius: 12px;
     padding: 22px 24px;
     transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
   }
   .card:hover { border-color: var(--border-bright); background: var(--bg-hover); }
-  .card.synced { box-shadow: var(--synced-glow); border-color: rgba(34, 211, 238, 0.5); }
 
   .card-accent {
     position: absolute;
@@ -212,7 +202,6 @@
   .accent-amber { background: linear-gradient(180deg, var(--amber), transparent); }
   .accent-green { background: linear-gradient(180deg, var(--green), transparent); }
   .accent-rose { background: linear-gradient(180deg, var(--rose), transparent); }
-  .accent-violet { background: linear-gradient(180deg, var(--violet), transparent); }
 
   .card-label {
     font-family: var(--font-mono);
@@ -232,7 +221,6 @@
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
 
   .tag {
     display: inline-block;
@@ -243,41 +231,90 @@
     border: 1px solid;
     margin: 2px 2px 2px 0;
     letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: all 0.2s;
     text-transform: uppercase;
   }
   .tag-skill { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-glow); }
-  .tag-skill:hover { background: rgba(34,211,238,0.2); }
   .tag-gap { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
   .tag-deliverable { color: var(--green); border-color: var(--green-dim); background: var(--green-glow); }
   .tag-experimental { color: var(--violet); border-color: rgba(167,139,250,0.4); background: var(--violet-glow); }
   .tag-msc { color: var(--rose); border-color: var(--rose-dim); background: var(--rose-glow); }
 
-  .obj-item {
+  .alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
     display: flex;
-    gap: 16px;
-    padding: 18px 20px;
+    gap: 12px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .alert-violet {
+    background: var(--violet-glow);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--violet);
+  }
+  .alert-amber {
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: var(--amber);
+  }
+  .alert-teal {
+    background: var(--teal-glow);
+    border: 1px solid rgba(34,211,238,0.3);
+    color: var(--teal);
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .platform-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.25s;
   }
-  .obj-item:hover { border-color: var(--border-bright); background: var(--bg-hover); }
-  .obj-item.synced { box-shadow: var(--synced-glow); }
-  .obj-num {
+  .platform-card:hover { border-color: var(--border-bright); }
+  .platform-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .platform-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .platform-url {
     font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--teal);
-    min-width: 28px;
-    padding-top: 2px;
-    font-weight: 700;
+    font-size: 10px;
+    color: var(--teal-dim);
   }
-  .obj-content {}
-  .obj-title { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; font-size: 13.5px; }
-  .obj-desc { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+  .live-dot::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .platform-body { padding: 16px 20px; color: var(--text-secondary); font-size: 12.5px; line-height: 1.65; }
 
   .pipeline {
     display: flex;
@@ -301,7 +338,7 @@
   }
   .pipe-stage:hover { border-color: var(--teal-dim); }
   .pipe-stage::after {
-    content: '→';
+    content: "→";
     position: absolute;
     right: -14px;
     top: 50%;
@@ -312,7 +349,6 @@
     pointer-events: none;
   }
   .pipe-stage:last-child::after { display: none; }
-  .pipe-arrow-gap { width: 28px; flex: 0 0 28px; }
   .pipe-stage + .pipe-stage { margin-left: 14px; }
   .pipe-num {
     font-family: var(--font-mono);
@@ -328,55 +364,76 @@
     line-height: 1.3;
   }
 
-  .phase-block {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-  .phase-header {
+  .expdesign-item {
     display: flex;
-    align-items: center;
     gap: 14px;
-    padding: 14px 20px;
+    padding: 16px 18px;
     background: var(--bg-card);
-    cursor: pointer;
-    transition: background 0.2s;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--violet);
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 10px;
+    transition: all 0.2s;
   }
-  .phase-header:hover { background: var(--bg-hover); }
-  .phase-num {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--teal);
-    background: var(--teal-glow);
-    border: 1px solid var(--teal-dim);
+  .expdesign-item:hover { background: var(--bg-hover); border-color: rgba(167,139,250,0.4); }
+  .expdesign-icon {
+    font-size: 18px;
+    min-width: 26px;
+    padding-top: 2px;
+    text-align: center;
+  }
+  .expdesign-title { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; font-size: 13px; }
+  .expdesign-body { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
+  .expdesign-impact {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(167,139,250,0.06);
+    border: 1px solid rgba(167,139,250,0.2);
     border-radius: 6px;
-    padding: 3px 8px;
-    letter-spacing: 0.06em;
+    font-size: 11.5px;
+    color: var(--violet);
+    font-style: italic;
   }
-  .phase-timeline {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-muted);
-  }
-  .phase-title-text { font-weight: 600; color: var(--text-primary); font-size: 13px; }
-  .phase-chevron {
-    margin-left: auto;
-    color: var(--text-muted);
-    transition: transform 0.25s;
-    font-size: 12px;
-  }
-  .phase-header.open .phase-chevron { transform: rotate(180deg); }
-  .phase-body {
-    display: none;
-    padding: 16px 20px 18px;
+
+  .section-divider {
+    border: none;
     border-top: 1px solid var(--border);
-    background: var(--bg-deep);
-    color: var(--text-secondary);
-    font-size: 12.5px;
-    line-height: 1.7;
+    margin: 36px 0;
   }
-  .phase-body.open { display: block; }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 8px; bottom: 8px;
+    width: 1.5px;
+    background: linear-gradient(180deg, var(--teal), var(--amber), var(--green));
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 16px;
+  }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    background: var(--bg-void);
+  }
+  .tl-time {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .tl-title { font-weight: 600; color: var(--text-primary); font-size: 13.5px; margin-bottom: 5px; }
+  .tl-body { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
 
   .skill-row {
     display: grid;
@@ -457,226 +514,6 @@
     display: inline-block;
   }
   .gap-high { color: var(--rose); border-color: var(--rose-dim); background: var(--rose-glow); }
-  .gap-med { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
-  .gap-low { color: var(--green); border-color: var(--green-dim); background: var(--green-glow); }
-
-  .expdesign-item {
-    display: flex;
-    gap: 14px;
-    padding: 16px 18px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--violet);
-    border-radius: 0 10px 10px 0;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-  }
-  .expdesign-item:hover { background: var(--bg-hover); border-color: rgba(167,139,250,0.4); }
-  .expdesign-icon {
-    font-size: 18px;
-    min-width: 26px;
-    padding-top: 2px;
-    text-align: center;
-  }
-  .expdesign-title { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; font-size: 13px; }
-  .expdesign-body { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
-  .expdesign-impact {
-    margin-top: 8px;
-    padding: 8px 12px;
-    background: rgba(167,139,250,0.06);
-    border: 1px solid rgba(167,139,250,0.2);
-    border-radius: 6px;
-    font-size: 11.5px;
-    color: var(--violet);
-    font-style: italic;
-  }
-
-  .timeline { position: relative; padding-left: 28px; }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 6px; top: 8px; bottom: 8px;
-    width: 1.5px;
-    background: linear-gradient(180deg, var(--teal), var(--amber), var(--green));
-  }
-  .tl-item {
-    position: relative;
-    margin-bottom: 24px;
-    padding-left: 16px;
-  }
-  .tl-item::before {
-    content: '';
-    position: absolute;
-    left: -22px;
-    top: 6px;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 2px solid var(--teal);
-    background: var(--bg-void);
-  }
-  .tl-time {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    color: var(--teal);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 4px;
-  }
-  .tl-title { font-weight: 600; color: var(--text-primary); font-size: 13.5px; margin-bottom: 5px; }
-  .tl-body { color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
-
-  .deliverable {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 14px;
-  }
-  .deliverable-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(13, 21, 32, 0.5);
-  }
-  .deliverable-num {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--bg-void);
-    background: var(--teal);
-    border-radius: 6px;
-    width: 26px; height: 26px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .deliverable-title { font-weight: 600; color: var(--text-primary); font-size: 14px; }
-  .deliverable-body { padding: 16px 20px; color: var(--text-secondary); font-size: 12.5px; line-height: 1.65; }
-  .deliverable-connects {
-    padding: 10px 20px 16px;
-    display: flex; gap: 8px; flex-wrap: wrap;
-    align-items: center;
-  }
-  .connects-label {
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-right: 4px;
-  }
-
-  .sync-hint {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--teal-dim);
-    padding: 6px 12px;
-    border: 1px dashed var(--teal-dim);
-    border-radius: 6px;
-    display: inline-block;
-    margin-bottom: 20px;
-    cursor: default;
-  }
-  .sync-hint::before { content: '⟳  '; }
-
-  .platform-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.25s;
-  }
-  .platform-card:hover { border-color: var(--border-bright); }
-  .platform-header {
-    padding: 16px 20px 14px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .platform-name {
-    font-family: var(--font-display);
-    font-size: 15px;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-  .platform-url {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--teal-dim);
-  }
-  .live-dot {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: var(--font-mono);
-    font-size: 9.5px;
-    color: var(--green);
-    flex-shrink: 0;
-  }
-  .live-dot::before {
-    content: '';
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 6px var(--green);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  .platform-body { padding: 16px 20px; color: var(--text-secondary); font-size: 12.5px; line-height: 1.65; }
-
-  .mono {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--teal);
-    background: rgba(34,211,238,0.07);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .alert {
-    padding: 14px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    line-height: 1.6;
-  }
-  .alert-violet {
-    background: var(--violet-glow);
-    border: 1px solid rgba(167,139,250,0.3);
-    color: var(--violet);
-  }
-  .alert-amber {
-    background: var(--amber-glow);
-    border: 1px solid rgba(245,158,11,0.3);
-    color: var(--amber);
-  }
-  .alert-teal {
-    background: var(--teal-glow);
-    border: 1px solid rgba(34,211,238,0.3);
-    color: var(--teal);
-  }
-  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-  @media (max-width: 780px) {
-    .header { padding: 18px 20px; }
-    .tab-panel { padding: 24px 20px 50px; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .skill-row { grid-template-columns: 1fr; }
-    .skill-row .skill-cell:not(:first-child) { border-top: 1px solid var(--border); }
-  }
-
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--teal-dim); border-radius: 3px; }
 
   .action-horizon {
     display: grid;
@@ -772,6 +609,29 @@
   .ctx-msc { color: var(--rose); border-color: var(--rose-dim); background: var(--rose-glow); }
   .ctx-both { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-glow); }
 
+  .progress-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-row:last-child { border-bottom: none; }
+  .progress-label { font-size: 12.5px; color: var(--text-secondary); flex: 1; }
+  .progress-track {
+    width: 140px; height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .progress-fill { height: 100%; border-radius: 3px; }
+  .progress-pct {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
   .blocker-item {
     display: flex;
     gap: 12px;
@@ -822,35 +682,22 @@
   .opt-a { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-glow); }
   .opt-b { color: var(--text-muted); border-color: var(--border); background: transparent; }
 
-  .progress-row {
-    display: flex; align-items: center; gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .progress-row:last-child { border-bottom: none; }
-  .progress-label { font-size: 12.5px; color: var(--text-secondary); flex: 1; }
-  .progress-track {
-    width: 140px; height: 5px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .progress-fill { height: 100%; border-radius: 3px; }
-  .progress-pct {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-muted);
-    min-width: 32px;
-    text-align: right;
-  }
-
   @media (max-width: 780px) {
+    .header { padding: 18px 20px; }
+    .tab-panel { padding: 24px 20px 50px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .skill-row { grid-template-columns: 1fr; }
+    .skill-row .skill-cell:not(:first-child) { border-top: 1px solid var(--border); }
     .action-horizon { grid-template-columns: 1fr; }
   }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--teal-dim); border-radius: 3px; }
 </style>
 </head>
 <body>
+
 <header class="header">
   <div class="header-left">
     <div class="header-badge">SM</div>
@@ -865,37 +712,186 @@
     <span class="header-tag tag-dsi">DSI-NRF Scholar</span>
   </div>
 </header>
+
 <nav class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('msc', this)"><span class="dot" style="background:var(--rose)"></span>MSc Proposal</button>
-  <button class="tab-btn" onclick="switchTab('experimental', this)"><span class="dot" style="background:var(--violet)"></span>Experimental Design Bridge</button>
-  <button class="tab-btn" onclick="switchTab('ufs', this)"><span class="dot" style="background:var(--amber)"></span>UFS Contribution</button>
-  <button class="tab-btn" onclick="switchTab('skills', this)"><span class="dot" style="background:var(--teal)"></span>Skills Matrix</button>
-  <button class="tab-btn" onclick="switchTab('roadmap', this)"><span class="dot" style="background:var(--green)"></span>Unified Roadmap</button>
-  <button class="tab-btn" onclick="switchTab('action', this)" style="position:relative"><span class="dot" style="background:#f97316"></span>Action Plan</button>
+  <button class="tab-btn active" onclick="switchTab('msc', this)">
+    <span class="dot" style="background:var(--rose)"></span>MSc Proposal
+  </button>
+  <button class="tab-btn" onclick="switchTab('experimental', this)">
+    <span class="dot" style="background:var(--violet)"></span>Experimental Design Bridge
+  </button>
+  <button class="tab-btn" onclick="switchTab('ufs', this)">
+    <span class="dot" style="background:var(--amber)"></span>UFS Contribution
+  </button>
+  <button class="tab-btn" onclick="switchTab('skills', this)">
+    <span class="dot" style="background:var(--teal)"></span>Skills Matrix
+  </button>
+  <button class="tab-btn" onclick="switchTab('roadmap', this)">
+    <span class="dot" style="background:var(--green)"></span>Unified Roadmap
+  </button>
+  <button class="tab-btn" onclick="switchTab('action', this)" style="position:relative">
+    <span class="dot" style="background:#f97316"></span>Action Plan<span style="position:absolute;top:8px;right:6px;width:7px;height:7px;border-radius:50%;background:#f97316;box-shadow:0 0 6px #f97316;animation:pulse 1.5s ease-in-out infinite"></span>
+  </button>
 </nav>
+
 <div id="tab-msc" class="tab-panel active">
   <div class="section-label">UCT Division of Computational Biology</div>
   <div class="section-title">An Interactive & Reproducible Bioinformatics Platform for CBIO</div>
   <div class="section-subtitle">Bridging the computational access divide in African genomics through web-based scRNA-seq and omics analysis — with a roadmap for AI-augmented research and experimentally-informed analytical design.</div>
-  <div class="alert alert-violet"><span class="alert-icon">🔬</span><span><strong>Wetlab Feedback Incorporated:</strong> Your colleague's feedback on experimental design has been integrated as a core research contribution — not just a caveat. The platform now explicitly addresses how upstream wet-lab decisions (dissociation protocols, batch design, replicate structure) should inform computational QC thresholds and parameter choices. See the <strong>Experimental Design Bridge</strong> tab for the full framework.</span></div>
-  <div style="margin-bottom:28px"><div class="section-label" style="margin-bottom:12px">Production-Deployed Platforms</div><div class="grid-2"><div class="platform-card"><div class="platform-header"><div><div class="platform-name">scRNA-seq Clinical Explorer</div><div class="platform-url">scrna-analysis.streamlit.app</div></div><div class="live-dot">LIVE</div></div><div class="platform-body">Eight-stage guided pipeline: data upload and validation → quality control → normalisation & scaling → dimensionality reduction (PCA) → neighbourhood graph → Leiden clustering → UMAP visualisation → cell type annotation and automated report generation. Biology-first QC design with real-time cell count projections.<div style="margin-top:12px"><span class="tag tag-skill">Scanpy</span><span class="tag tag-skill">Docker</span><span class="tag tag-skill">Streamlit</span><span class="tag tag-skill">Leiden</span><span class="tag tag-skill">scANVI</span><span class="tag tag-experimental">QC-Aware</span></div></div></div><div class="platform-card"><div class="platform-header"><div><div class="platform-name">Variant Analysis Suite</div><div class="platform-url">simon-variants.streamlit.app</div></div><div class="live-dot">LIVE</div></div><div class="platform-body">Multi-sample VCF processing with SnpEff functional annotation, ClinVar integration, and African-contextualised ACMG-lite pathogenicity classification. First open-source implementation explicitly flagging European-ancestry gnomAD bias for African population variants. NHLS-aligned clinical reporting.<div style="margin-top:12px"><span class="tag tag-skill">SnpEff</span><span class="tag tag-skill">ClinVar</span><span class="tag tag-skill">ACMG-lite</span><span class="tag tag-skill">gnomAD-AFR</span><span class="tag tag-skill">scikit-allel</span></div></div></div></div></div>
-  <div style="margin-bottom:28px"><div class="section-label" style="margin-bottom:10px">Eight-Stage scRNA-seq Pipeline</div><div class="pipeline"><div class="pipe-stage"><div class="pipe-num">STAGE 1</div><div class="pipe-name">Data Upload & Validation</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 2</div><div class="pipe-name">Quality Control</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 3</div><div class="pipe-name">Normalisation & Scaling</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 4</div><div class="pipe-name">Dimensionality Reduction</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 5</div><div class="pipe-name">Neighbourhood Graph</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 6</div><div class="pipe-name">Leiden Clustering</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 7</div><div class="pipe-name">UMAP Visualisation</div></div><div class="pipe-stage"><div class="pipe-num">STAGE 8</div><div class="pipe-name">Cell Type Annotation & Report</div></div></div><div style="font-size:11.5px; color:var(--text-muted); margin-top:6px; font-family:var(--font-mono)">Stages 2, 5, 6 are most sensitive to upstream wet-lab decisions — see Experimental Design Bridge tab</div></div>
+  <div class="alert alert-violet"><span class="alert-icon">🔬</span><span><strong>Wetlab Feedback Incorporated:</strong> Your colleague's feedback on experimental design has been integrated as a core research contribution. The platform now explicitly addresses how upstream wet-lab decisions should inform computational QC thresholds and parameter choices. See the <strong>Experimental Design Bridge</strong> tab for the full framework.</span></div>
 </div>
-<div id="tab-experimental" class="tab-panel"><div class="section-label">Wetlab Colleague Feedback — Research Direction Shaper</div><div class="section-title">Experimental Design: What Bioinformaticians Often Miss</div><div class="section-subtitle">Your wetlab colleague's feedback was not a critique — it was a research contribution. She identified a systematic gap between computational tools and the wet-lab realities that generate the data they process. Addressing this gap is now Objective 5 of your MSc and a core feature of the platform.</div>
-  <div class="alert alert-amber"><span class="alert-icon">⚡</span><span><strong>Why this matters at UFS specifically:</strong> You now have direct access to the UFS-NGS Unit's wet lab. You can close this loop empirically — observing how samples are collected, extracted, and sequenced, and translating that knowledge directly into adaptive QC parameters in your platform. This is a genuine translational research opportunity that most computational biologists never get.</span></div>
+
+<div id="tab-experimental" class="tab-panel">
+  <div class="section-label">Wetlab Colleague Feedback — Research Direction Shaper</div>
+  <div class="section-title">Experimental Design: What Bioinformaticians Often Miss</div>
+  <div class="section-subtitle">Your wetlab colleague's feedback was not a critique — it was a research contribution. She identified a systematic gap between computational tools and the wet-lab realities that generate the data they process. Addressing this gap is now Objective 5 of your MSc and a core feature of the platform.</div>
+  <div class="alert alert-amber"><span class="alert-icon">⚡</span><span><strong>Why this matters at UFS specifically:</strong> You now have direct access to the UFS-NGS Unit's wet lab. You can close this loop empirically — observing how samples are collected, extracted, and sequenced, and translating that knowledge directly into adaptive QC parameters in your platform.</span></div>
   <div class="section-label" style="margin-bottom:12px">Key Experimental Design Gaps & Platform Responses</div>
-  <div class="expdesign-item"><div class="expdesign-icon">🔬</div><div><div class="expdesign-title">1. Tissue Dissociation Protocol — Direct Impact on QC Thresholds</div><div class="expdesign-body">Enzymatic dissociation (collagenase, trypsin) versus mechanical dissociation produces systematically different stress response gene profiles. Enzymatic protocols induce heat-shock and immediate early gene expression (HSP70, JUN, FOS) that are biologically artifactual. This affects which genes appear in the HVG selection and which clusters you identify.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> The platform's Stage 2 QC now prompts users to declare their dissociation method. Enzymatic dissociation triggers a stress gene exclusion module, and the HVG selection in Stage 3 filters known dissociation-induced artefact genes before clustering.</div><div class="expdesign-impact">→ Directly changes which cells survive QC and which clusters emerge in Stage 6 (Leiden). A bioinformatician who ignores this will cluster stress-response artefacts as real biological populations.</div></div></div>
-  <div class="expdesign-item"><div class="expdesign-icon">📦</div><div><div class="expdesign-title">2. Batch Effects from Library Preparation — The Silent Confounder</div><div class="expdesign-body">Library preparation batches run on different days, by different operators, with different reagent lots introduce systematic technical variation that is indistinguishable from biological signal without prior knowledge of the experimental design. A bioinformatician receiving data without batch metadata will confound technical with biological variation.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> The Stage 1 upload interface now requires batch metadata declaration. Multi-batch datasets are routed through Harmony or scVI-based batch correction before neighbourhood graph construction, with a pre/post-correction embedding comparison shown to the user.</div><div class="expdesign-impact">→ Without this, UMAP clusters in Stage 7 may reflect which sample was run on which machine, not which cell type it is. Wetlab knowledge of experimental batches is prerequisite data, not optional metadata.</div></div></div>
-  <div class="expdesign-item"><div class="expdesign-icon">🧬</div><div><div class="expdesign-title">3. Biological vs Technical Replicates — What Your Statistics Actually Test</div><div class="expdesign-body">A bioinformatician receiving three samples from the same patient (technical replicates) and three samples from three patients (biological replicates) may treat them identically. They are not. Differential expression analysis with technical replicates pseudoreplicates — inflating statistical power and producing false positives. The H3ABioNet training materials frequently under-address this distinction.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> The Stage 8 DE analysis module now requires users to declare replicate structure. Pseudobulk methods (DESeq2 via decoupleR) are applied for multi-donor designs; within-sample DE is restricted appropriately. The report section explicitly states the statistical model used and its assumptions.</div><div class="expdesign-impact">→ This is publishability-critical. Reviewers at Nature Methods and Genome Biology will reject papers where DE analysis uses inappropriate replicate structures. The platform enforcing this makes it a quality-control gatekeeping tool, not just an analysis convenience.</div></div></div>
-  <div class="expdesign-item"><div class="expdesign-icon">❄️</div><div><div class="expdesign-title">4. Sample Preservation & RNA Quality — What RIN Scores Tell You</div><div class="expdesign-body">Fresh vs cryopreserved samples, FFPE sections, and fresh-frozen tissue produce systematically different RNA integrity profiles. A cryopreserved PBMC sample that experienced a partial freeze-thaw cycle will show elevated mitochondrial read fractions and depleted ribosomal RNA — patterns that standard QC interprets as dying cells, triggering aggressive filtering that removes real biological signal. The standard 20% mitochondrial threshold is calibrated for fresh PBMC and will over-filter cryopreserved samples.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> Stage 1 now includes a sample condition declaration (fresh / cryopreserved / FFPE / frozen). Mitochondrial thresholds in Stage 2 are adaptively adjusted: cryopreserved samples use a relaxed threshold (30–35%), with a flagged warning that the researcher should validate against RIN score metadata. This is the adaptive parameter system described in Phase 3 AI — but implementable now with rule-based logic from wetlab knowledge.</div><div class="expdesign-impact">→ At UFS-NGS Unit, rotavirus stool samples and respiratory clinical specimens have variable preservation quality. This is directly applicable to the metagenomics pipeline you're building there.</div></div></div>
-  <div class="expdesign-item"><div class="expdesign-icon">🔢</div><div><div class="expdesign-title">5. Cell Loading Density — Doublet Rate Is Experimental, Not Computational</div><div class="expdesign-body">Doublet rates in 10x Chromium data are a direct function of how many cells were loaded into the microfluidic chip. The standard recommendation is 6,000–10,000 cells per lane; over-loading a chip to maximise throughput increases doublet rates from ~4% to >10%. DoubletFinder and Scrublet can detect doublets computationally, but their performance degrades when doublet rates exceed ~8%. A bioinformatician who doesn't know the cell loading density cannot appropriately parameterise doublet detection.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> Stage 1 now requests cells-loaded value. The expected doublet rate is calculated from the manufacturer's loading curve and used to parameterise Scrublet's expected doublet rate parameter — replacing the default assumption with wet-lab knowledge.</div><div class="expdesign-impact">→ This is the clearest example of wetlab-computational integration. The wet-lab decision (how many cells to load) directly determines the optimal computational parameter (expected doublet rate). The platform now closes that loop.</div></div></div>
-  <div class="expdesign-item"><div class="expdesign-icon">⏱️</div><div><div class="expdesign-title">6. Sequencing Depth — Reads per Cell Is a Wet-Lab Budget Decision</div><div class="expdesign-body">The number of reads per cell (sequencing depth) is determined when the library is submitted for sequencing, not during analysis. Low-depth libraries (1,000–3,000 reads/cell) produce sparse count matrices where rare transcripts are frequently missed — leading to poor clustering resolution and unreliable marker gene identification. High-depth libraries are expensive. This trade-off is made in the wet lab, but its consequences appear computationally.<br><br><strong style="color:var(--text-primary)">Platform response:</strong> Stage 1 includes a sequencing depth declaration (reads per cell). The platform calculates median genes detected and flags datasets where depth is insufficient for the declared analysis goal (rare cell type identification requires deeper sequencing than broad cell type annotation). This guidance appears before QC begins, not after the analysis fails.</div><div class="expdesign-impact">→ Applicable directly to UFS-NGS rotavirus WGS: sequencing depth decisions for variant calling are made at library preparation. Your platform can flag depth-quality issues before downstream analysis begins.</div></div></div>
-  <hr class="section-divider"><div class="section-label" style="margin-bottom:12px">How This Changes Your MSc Research Argument</div><div class="grid-2"><div class="card"><div class="card-accent accent-rose"></div><div class="card-label" style="color:var(--rose)">Before Wetlab Feedback</div><div class="card-title">Platform as Computational Tool</div><div class="card-body">The platform democratises access to command-line bioinformatics pipelines. Wet-lab researchers can run analyses without computational expertise. Focus: software engineering + usability.</div></div><div class="card"><div class="card-accent accent-teal"></div><div class="card-label" style="color:var(--teal)">After Wetlab Feedback (Current)</div><div class="card-title">Platform as Translational Research Infrastructure</div><div class="card-body">The platform integrates experimental metadata to make computational parameters experimentally-informed. It doesn't just make analysis accessible — it makes it correct for the biology. Focus: software engineering + experimental validity + epistemic quality.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">🔬</div><div><div class="expdesign-title">1. Tissue Dissociation Protocol — Direct Impact on QC Thresholds</div><div class="expdesign-body">Enzymatic dissociation versus mechanical dissociation produces systematically different stress response gene profiles. This affects which genes appear in the HVG selection and which clusters you identify.</div><div class="expdesign-impact">→ Computational parameter design must account for upstream wet-lab choices to avoid confounding.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">📦</div><div><div class="expdesign-title">2. Batch Effects from Library Preparation — The Silent Confounder</div><div class="expdesign-body">Library preparation batches introduce systematic technical variation indistinguishable from biological signal without metadata.</div><div class="expdesign-impact">→ Batch correction must precede downstream analysis; metadata is prerequisite data.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">🧬</div><div><div class="expdesign-title">3. Biological vs Technical Replicates — What Your Statistics Actually Test</div><div class="expdesign-body">Technical replicates vs biological replicates require different statistical models. Pseudobulk methods are critical for multi-donor designs.</div><div class="expdesign-impact">→ Platform enforces replicate structure declaration and applies appropriate models.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">❄️</div><div><div class="expdesign-title">4. Sample Preservation & RNA Quality — What RIN Scores Tell You</div><div class="expdesign-body">Fresh vs cryopreserved samples produce systematically different profiles. Standard QC thresholds will over-filter cryopreserved samples.</div><div class="expdesign-impact">→ Adaptive QC thresholds based on preservation method prevent loss of valid data.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">🔢</div><div><div class="expdesign-title">5. Cell Loading Density — Doublet Rate Is Experimental, Not Computational</div><div class="expdesign-body">Doublet rates in 10x Chromium data are a direct function of cell loading. Over-loading increases doublet rates degrading analysis.</div><div class="expdesign-impact">→ Platform calculates expected doublet rate from loading density.</div></div></div>
+  <div class="expdesign-item"><div class="expdesign-icon">⏱️</div><div><div class="expdesign-title">6. Sequencing Depth — Reads per Cell Is a Wet-Lab Budget Decision</div><div class="expdesign-body">Low-depth libraries produce sparse count matrices where rare transcripts are missed. This trade-off is made at sequencing submission.</div><div class="expdesign-impact">→ Platform flags depth-quality issues before downstream analysis.</div></div></div>
+  <hr class="section-divider">
+  <div class="section-label" style="margin-bottom:12px">How This Changes Your MSc Research Argument</div>
+  <div class="grid-2"><div class="card"><div class="card-accent accent-rose"></div><div class="card-label" style="color:var(--rose)">Before Wetlab Feedback</div><div class="card-title">Platform as Computational Tool</div><div class="card-body">Democratizes access to bioinformatics pipelines. Focus: software engineering + usability.</div></div><div class="card"><div class="card-accent accent-teal"></div><div class="card-label" style="color:var(--teal)">After Wetlab Feedback (Current)</div><div class="card-title">Platform as Translational Research Infrastructure</div><div class="card-body">Integrates experimental metadata to make parameters experimentally-informed. Focus: software + experimental validity + epistemic quality.</div></div></div>
 </div>
-<div id="tab-ufs" class="tab-panel"><div class="section-label">UFS-NGS Unit, Bloemfontein — Internship Contribution Plan</div><div class="section-title">Rotavirus Genomics & Respiratory Surveillance</div><div class="section-subtitle">Prof. Martin Nyaga's unit holds WHO Collaborating Centre status for VPD Surveillance and chairs the Africa CDC Pathogen Genomics Initiative VPD Working Group. These are the computational gaps you can fill — and they directly feed your MSc deliverables.</div><div class="sync-hint">Items are linked to your MSc Skills Matrix — switch to Skills Matrix tab to see cross-references</div><div style="margin-bottom:10px"><div class="section-label" style="margin-bottom:12px">Domain 1 — Rotavirus Genomics (WHO CC Priority)</div></div><table class="gap-table" style="margin-bottom:28px"><thead><tr><th>Gap</th><th>Current State</th><th>Your Contribution</th><th>Priority</th></tr></thead><tbody><tr><td><strong style="color:var(--text-primary)">Automated WGS Pipeline</strong><br>Reproducible, scalable rotavirus sequencing pipeline from raw reads to genotype</td><td>WGS conducted on Rotarix/RotaTeq/Rotavac/Rotasiil samples across ARSN. Likely semi-manual or ad-hoc pipeline steps.</td><td>Nextflow DSL2 pipeline: FastQC → Trimmomatic → IRMA assembly → RotaC2 genotyping → phylogenetic inference. Docker containerised. Deployable across ARSN nodes.</td><td><span class="gap-label gap-high">Critical</span></td></tr></tbody></table></div>
-<div id="tab-skills" class="tab-panel"><div class="section-label">Cross-Context Skill Mapping</div><div class="section-title">Your Skills — Mapped to MSc & UFS Simultaneously</div><div class="section-subtitle">Every tool and method you already deploy maps to at least one MSc objective and at least one UFS contribution. This is the evidence that your internship and your MSc are one research identity, not two competing commitments.</div></div>
-<div id="tab-roadmap" class="tab-panel"><div class="section-label">Integrated Research Timeline</div><div class="section-title">MSc + UFS Internship — One Coherent Research Identity</div><div class="section-subtitle">This roadmap shows how your UCT MSc milestones and UFS-NGS internship deliverables run in parallel and reinforce each other — so that by the end of the internship year, your MSc has gained real-world validation data, and the UFS-NGS Unit has gained permanent infrastructure.</div></div>
-<div id="tab-action" class="tab-panel"><div class="section-label">Operational Planning — Week by Week</div><div class="section-title">What You Need to Do, and When</div><div class="section-subtitle">You are in Week 1 at UFS (May 2026). Everything below is sequenced so that each step unlocks the next. Start with the This Week column — nothing else matters until those are done.</div></div>
+
+<div id="tab-ufs" class="tab-panel">
+  <div class="section-label">UFS-NGS Unit, Bloemfontein — Internship Contribution Plan</div>
+  <div class="section-title">Rotavirus Genomics & Respiratory Surveillance</div>
+  <div class="section-subtitle">Prof. Martin Nyaga's unit holds WHO Collaborating Centre status. These are the computational gaps you can fill — and they directly feed your MSc deliverables.</div>
+  <div style="margin-bottom:28px">
+    <div class="section-label" style="margin-bottom:12px">Three Core Deliverables</div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px">
+      <span class="tag tag-deliverable">Deliverable 1</span>
+      <span style="color:var(--text-secondary);font-size:12.5px">Automated rotavirus WGS pipeline (FastQC → Trimmomatic → IRMA → RotaC2 → phylogenetics)</span>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px">
+      <span class="tag tag-deliverable">Deliverable 2</span>
+      <span style="color:var(--text-secondary);font-size:12.5px">Clinical metagenomics pipeline (Kraken2 → Bracken → host depletion) for respiratory surveillance</span>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px">
+      <span class="tag tag-deliverable">Deliverable 3</span>
+      <span style="color:var(--text-secondary);font-size:12.5px">Genomic Surveillance Dashboard (Streamlit + Tableau) for WHO CC reporting and SARI early-warning</span>
+    </div>
+  </div>
+</div>
+
+<div id="tab-skills" class="tab-panel">
+  <div class="section-label">Cross-Context Skill Mapping</div>
+  <div class="section-title">Your Skills — Mapped to MSc & UFS Simultaneously</div>
+  <div class="section-subtitle">Every tool and method you deploy maps to at least one MSc objective and at least one UFS contribution. This is evidence that your internship and MSc are one research identity.</div>
+  <div class="alert alert-teal"><span class="alert-icon">🔗</span><span>Click any skill row to highlight its connections. Relevance bars show contribution strength — MSc (rose) and UFS-NGS (amber).</span></div>
+  <div style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+    <div class="skill-row header-row">
+      <div class="skill-cell matrix-header">Skill / Tool</div>
+      <div class="skill-cell matrix-header">MSc Contribution (UCT CBIO)</div>
+      <div class="skill-cell matrix-header">UFS-NGS Contribution</div>
+    </div>
+    <div class="skill-row" onclick="this.classList.toggle('synced')">
+      <div class="skill-cell"><div class="skill-name">Nextflow DSL2 Pipelines</div><div class="skill-tool">github.com/Simon-Mufara</div><div class="relevance-bar"><div class="relevance-fill fill-teal" style="width:95%"></div></div></div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Objective 3 (Deployment); SLURM integration</div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Deliverable 1 & 2; ARSN deployment</div>
+    </div>
+    <div class="skill-row" onclick="this.classList.toggle('synced')">
+      <div class="skill-cell"><div class="skill-name">scRNA-seq Analysis</div><div class="skill-tool">Scanpy · scANVI · Leiden</div><div class="relevance-bar"><div class="relevance-fill fill-teal" style="width:100%"></div></div></div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Core platform; Objectives 1, 4, 5</div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Paediatric virome transcriptomics</div>
+    </div>
+    <div class="skill-row" onclick="this.classList.toggle('synced')">
+      <div class="skill-cell"><div class="skill-name">Variant Calling & Annotation</div><div class="skill-tool">SnpEff · ClinVar · ACMG-lite</div><div class="relevance-bar"><div class="relevance-fill fill-teal" style="width:90%"></div></div></div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Variant Analysis Suite</div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Rotavirus variant calling; RSV detection</div>
+    </div>
+    <div class="skill-row" onclick="this.classList.toggle('synced')">
+      <div class="skill-cell"><div class="skill-name">Streamlit Platform Development</div><div class="skill-tool">scrna-analysis · simon-variants</div><div class="relevance-bar"><div class="relevance-fill fill-teal" style="width:95%"></div></div></div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Both platforms; H3ABioNet training</div>
+      <div class="skill-cell" style="color:var(--text-secondary);font-size:12.5px">Deliverable 3; SARI early-warning</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-roadmap" class="tab-panel">
+  <div class="section-label">Integrated Research Timeline</div>
+  <div class="section-title">MSc + UFS Internship — One Coherent Research Identity</div>
+  <div class="section-subtitle">Your UCT MSc milestones and UFS-NGS internship deliverables run in parallel and reinforce each other — so by year end, your MSc has real-world validation data, and UFS-NGS has permanent infrastructure.</div>
+  <div class="grid-2" style="gap:40px">
+    <div>
+      <div class="section-label" style="color:var(--rose);margin-bottom:16px">UCT MSc Track (Prof. Dalvie)</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-time">Month 1–2 · May–June 2026</div><div class="tl-title">Proposal Finalisation & HREC</div><div class="tl-body">Incorporate experimental design framework (Objective 5). Submit to HREC.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 3–4 · July–August 2026</div><div class="tl-title">Platform v1.0 Cloud Deployment</div><div class="tl-body">Deploy on AWS af-south-1. Run structured 10-researcher pilot.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 5–6 · Sept–Oct 2026</div><div class="tl-title">Phase 1 AI Integration</div><div class="tl-body">Integrate scANVI and AlphaMissense. Extend to all CBIO pipelines.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 7–9 · Nov 2026–Jan 2027</div><div class="tl-title">Concordance Study</div><div class="tl-body">Execute study. Draft methods paper. H3ABioNet training deployment.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 10–12 · Feb–Apr 2027</div><div class="tl-title">Grants & Open-Source Release</div><div class="tl-body">NRF, H3Africa applications. GitHub release. Thesis write-up.</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="color:var(--amber);margin-bottom:16px">UFS-NGS Internship Track (Prof. Nyaga)</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-time">Month 1–2 · May–June 2026</div><div class="tl-title">Onboarding + Pipeline Design</div><div class="tl-body">Orient to wet lab protocols. Begin Nextflow rotavirus pipeline.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 3–4 · July–August 2026</div><div class="tl-title">Rotavirus Pipeline v1.0</div><div class="tl-body">Deploy and validate. Begin metagenomics design.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 5–6 · Sept–Oct 2026</div><div class="tl-title">Metagenomics Pipeline & Dashboard v1.0</div><div class="tl-body">Deploy metagenomics. Prototype surveillance dashboard.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 7–9 · Nov 2026–Jan 2027</div><div class="tl-title">Surveillance Dashboard + SARI</div><div class="tl-body">Complete dashboard. Prototype AI SARI classifier. Submit methods paper.</div></div>
+        <div class="tl-item"><div class="tl-time">Month 10–12 · Feb–Apr 2027</div><div class="tl-title">Africa CDC Dashboard & ARSN Deployment</div><div class="tl-body">Prepare for CDC presentation. Package for ARSN nodes.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-action" class="tab-panel">
+  <div class="section-label">Operational Planning — Week by Week</div>
+  <div class="section-title">What You Need to Do, and When</div>
+  <div class="section-subtitle">You are in Week 1 at UFS (May 2026). Everything is sequenced so each step unlocks the next. Start with the This Week column — nothing else matters until those are done.</div>
+  <div class="alert alert-amber"><span class="alert-icon">📌</span><span><strong>Where you are right now:</strong> Day ~5 at UFS-NGS with two tracks running simultaneously. The risk is doing both poorly without clear structure. <strong>Click any task to mark it done.</strong></span></div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:28px">
+    <div class="section-label" style="margin-bottom:14px">Track Progress Overview</div>
+    <div class="progress-row"><div class="progress-label">🔴 MSc Proposal — Submitted, awaiting feedback</div><div class="progress-track"><div class="progress-fill" style="width:30%;background:var(--rose)"></div></div><div class="progress-pct" style="color:var(--rose)">30%</div></div>
+    <div class="progress-row"><div class="progress-label">🟡 UFS Rotavirus Pipeline — Not yet started</div><div class="progress-track"><div class="progress-fill" style="width:5%;background:var(--amber)"></div></div><div class="progress-pct" style="color:var(--amber)">5%</div></div>
+    <div class="progress-row"><div class="progress-label">🟢 Platform Infrastructure — Two live platforms, AI roadmap designed</div><div class="progress-track"><div class="progress-fill" style="width:65%;background:var(--green)"></div></div><div class="progress-pct" style="color:var(--green)">65%</div></div>
+  </div>
+  <div class="action-horizon">
+    <div class="horizon-col">
+      <div class="horizon-header"><div class="horizon-dot" style="background:#f97316;box-shadow:0 0 6px #f97316;animation:pulse 1.5s ease-in-out infinite"></div><span class="horizon-label">This Week · May 6–12</span></div>
+      <div class="horizon-title">Orient & Unblock</div>
+      <div class="horizon-count" id="count-week">0 / 5 done</div>
+      <div class="task-item" onclick="toggleTask(this,'count-week')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Book one-on-one with Prof. Nyaga — what is his most urgent need right now?</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-week')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Request cluster access & confirm Singularity availability</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-week')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Meet Angela Mbele — ask about metagenomics data formats and blockers</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-week')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Observe wet lab session — take experimental design notes</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-week')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Email Prof. Mulder with arrival update and confirm reporting schedule</div></div><span class="task-context ctx-msc">MSc</span></div>
+    </div>
+    <div class="horizon-col">
+      <div class="horizon-header"><div class="horizon-dot" style="background:var(--amber)"></div><span class="horizon-label">This Month · May 2026</span></div>
+      <div class="horizon-title">Build Foundation</div>
+      <div class="horizon-count" id="count-month">0 / 5 done</div>
+      <div class="task-item" onclick="toggleTask(this,'count-month')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Set up dev environment: conda, Nextflow 23+, Singularity, samtools, FastQC</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-month')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Create GitHub repo for UFS work (ufs-ngs-pipelines)</div></div><span class="task-context ctx-both">Both</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-month')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Draft 1-page rotavirus pipeline design — get sign-off from Prof. Nyaga</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-month')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Design experimental metadata intake form for platform Stage 1</div></div><span class="task-context ctx-both">Both</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-month')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Draft Objective 5 paragraph and send to Prof. Mulder</div></div><span class="task-context ctx-msc">MSc</span></div>
+    </div>
+    <div class="horizon-col">
+      <div class="horizon-header"><div class="horizon-dot" style="background:var(--teal)"></div><span class="horizon-label">Next 3 Months · June–August</span></div>
+      <div class="horizon-title">Build & Validate</div>
+      <div class="horizon-count" id="count-q2">0 / 4 done</div>
+      <div class="task-item" onclick="toggleTask(this,'count-q2')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Rotavirus WGS pipeline v1.0 deployed and validated — Deliverable 1</div></div><span class="task-context ctx-ufs">UFS</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-q2')"><div class="task-check"></div><div style="flex:1"><div class="task-text">MSc platform deployed on AWS af-south-1 with concordance study data</div></div><span class="task-context ctx-msc">MSc</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-q2')"><div class="task-check"></div><div style="flex:1"><div class="task-text">Experimental design metadata integrated into platform Stage 1 — Objective 5</div></div><span class="task-context ctx-both">Both</span></div>
+      <div class="task-item" onclick="toggleTask(this,'count-q2')"><div class="task-check"></div><div style="flex:1"><div class="task-text">HREC ethics application submitted for UCT MSc</div></div><span class="task-context ctx-msc">MSc</span></div>
+    </div>
+  </div>
+  <div class="section-label" style="margin-bottom:14px">Blocking Questions — Resolve Before Moving Forward</div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div class="blocker-item"><div class="blocker-icon">🔴</div><div><div class="blocker-q">What is Prof. Nyaga's single most urgent priority?</div><div class="blocker-why">Without this you will optimize for the wrong thing. Ask directly in your first one-on-one.</div></div></div>
+    <div class="blocker-item"><div class="blocker-icon">🔴</div><div><div class="blocker-q">What rotavirus WGS data exists — formats, samples, metadata?</div><div class="blocker-why">Pipeline design depends entirely on input format. Do not design before you see the data.</div></div></div>
+    <div class="blocker-item"><div class="blocker-icon">🟡</div><div><div class="blocker-q">Has Prof. Mulder responded to the proposal with feedback?</div><div class="blocker-why">If not, follow up — blocks your ethics application and timeline.</div></div></div>
+    <div class="blocker-item"><div class="blocker-icon">🟡</div><div><div class="blocker-q">Does UFS ethics approval cover computational use of archived samples?</div><div class="blocker-why">You cannot publish without ethics coverage. Ask Prof. Nyaga if new application needed.</div></div></div>
+  </div>
+</div>
+
 <script>
   function switchTab(id, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -903,6 +899,22 @@
     document.getElementById('tab-' + id).classList.add('active');
     btn.classList.add('active');
   }
+
+  function toggleTask(item, countId) {
+    item.classList.toggle('done');
+    const check = item.querySelector('.task-check');
+    check.textContent = item.classList.contains('done') ? '✓' : '';
+    const col = document.getElementById(countId).closest('.horizon-col');
+    const total = col.querySelectorAll('.task-item').length;
+    const done = col.querySelectorAll('.task-item.done').length;
+    document.getElementById(countId).textContent = done + ' / ' + total + ' done';
+    if (done === total) {
+      document.getElementById(countId).style.color = 'var(--green)';
+    } else {
+      document.getElementById(countId).style.color = '';
+    }
+  }
 </script>
+
 </body>
 </html>
