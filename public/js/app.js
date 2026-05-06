@@ -187,8 +187,11 @@ function saveLocalLibrary() {
 }
 
 function getResearchPdfUrl() {
-  // Try relative paths so the PDF resolves correctly on GitHub Pages
-  // (project pages use a repo subpath, so leading '/' can break the path).
+  // Synchronous fallback for callers that expect a string
+  return './research_focus.pdf';
+}
+
+async function findResearchPdfUrl() {
   const candidates = [
     './research_focus.pdf',
     'research_focus.pdf',
@@ -197,8 +200,19 @@ function getResearchPdfUrl() {
     '/research_focus.pdf'
   ];
 
-  // Return the first candidate (relative paths will work for project pages).
-  return candidates[0];
+  for (const c of candidates) {
+    try {
+      const res = await fetch(c, { method: 'GET', cache: 'no-store' });
+      if (res && res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('pdf') || c.toLowerCase().endsWith('.pdf')) return c;
+      }
+    } catch (e) {
+      // ignore and continue
+    }
+  }
+
+  return './research_focus.pdf';
 }
 
 function ensureDefaultResearchProject() {
@@ -214,6 +228,15 @@ function ensureDefaultResearchProject() {
       supervisor: 'Prof. Nicole Mulder',
       locked: true
     });
+    // probe for a working URL and update project when found
+    findResearchPdfUrl().then(url => {
+      const p = localLibrary.projects.find(proj => proj.locked && proj.title === 'Current Research Focus');
+      if (p) {
+        p.fileUrl = url;
+        saveLocalLibrary();
+        renderProjects();
+      }
+    }).catch(() => {});
     saveLocalLibrary();
   }
 }

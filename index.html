@@ -1739,7 +1739,11 @@
         }
 
         function getResearchPdfUrl() {
-            // Prefer relative paths so the PDF resolves under project pages on GitHub Pages.
+            // Synchronous fallback
+            return './research_focus.pdf';
+        }
+
+        async function findResearchPdfUrl() {
             const candidates = [
                 './research_focus.pdf',
                 'research_focus.pdf',
@@ -1748,7 +1752,17 @@
                 '/research_focus.pdf'
             ];
 
-            return candidates[0];
+            for (const c of candidates) {
+                try {
+                    const res = await fetch(c, { method: 'GET', cache: 'no-store' });
+                    if (res && res.ok) {
+                        const ct = res.headers.get('content-type') || '';
+                        if (ct.includes('pdf') || c.toLowerCase().endsWith('.pdf')) return c;
+                    }
+                } catch (e) { }
+            }
+
+            return './research_focus.pdf';
         }
 
         // ==================== STORAGE ====================
@@ -1777,6 +1791,11 @@
                     supervisor: 'Prof. Nicole Mulder',
                     locked: true
                 });
+                // probe and update the project URL
+                findResearchPdfUrl().then(url => {
+                    const p = appState.projects.find(pr => pr.locked && pr.title === 'Current Research Focus');
+                    if (p) { p.fileUrl = url; saveAppState(); loadProjects(); }
+                }).catch(() => {});
                 saveAppState();
             }
 
