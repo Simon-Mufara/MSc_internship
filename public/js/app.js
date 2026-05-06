@@ -10,6 +10,7 @@ let appData = {
 };
 
 let messagePollId = null;
+let socket = null;
 
 let localLibrary = {
   resources: { lectures: [], recordings: [], materials: [] },
@@ -135,11 +136,32 @@ async function initApp() {
   setupNavigation();
   loadLocalLibrary();
   await loadAllData();
+  initSocket();
   mergeExamTimetable();
   focusCalendarOnExams();
   renderCalendar();
   await updateDashboard();
   await renderProjects();
+}
+
+function initSocket() {
+  try {
+    if (typeof io === 'undefined') return; // socket.io client not present
+    if (socket) return;
+    const token = localStorage.getItem('authToken');
+    socket = io({ auth: { token } });
+    socket.on('connect', () => console.log('Socket connected'));
+    socket.on('new_message', (data) => {
+      // refresh message lists if involved
+      if (!currentUser) return;
+      if (data.recipient === currentUser || data.sender === currentUser) {
+        loadMessages('conveyor');
+        loadMessages('supervisor');
+      }
+    });
+  } catch (e) {
+    console.warn('Socket init failed:', e.message || e);
+  }
 }
 
 function loadLocalLibrary() {

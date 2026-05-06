@@ -43,16 +43,27 @@ router.post('/',
         VALUES (?, ?, ?)
       `, [sender, recipient, content]);
 
-      res.status(201).json({
-        message: 'Message sent',
-        messageData: {
-          id: result.id,
-          sender,
-          recipient,
-          content,
-          timestamp: new Date().toISOString()
+      const messageData = {
+        id: result.id,
+        sender,
+        recipient,
+        content,
+        timestamp: new Date().toISOString()
+      };
+
+      // Emit via Socket.IO if available
+      try {
+        const io = req.app.get('io');
+        if (io) {
+          // send to both sender and recipient rooms
+          io.to(`user:${recipient}`).emit('new_message', messageData);
+          io.to(`user:${sender}`).emit('new_message', messageData);
         }
-      });
+      } catch (emitErr) {
+        console.error('Error emitting message via Socket.IO:', emitErr.message || emitErr);
+      }
+
+      res.status(201).json({ message: 'Message sent', messageData });
     } catch (err) {
       console.error('Error sending message:', err);
       res.status(500).json({ message: 'Error sending message', error: err.message });

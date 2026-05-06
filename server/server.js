@@ -2,8 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const http = require('http');
 const { initDatabase } = require('./db');
-const { auth } = require('./middleware/auth');
+const { auth, JWT_SECRET } = require('./middleware/auth');
+const jwt = require('jsonwebtoken');
 
 const authRoutes = require('./routes/auth');
 const eventsRoutes = require('./routes/events');
@@ -13,6 +15,7 @@ const progressRoutes = require('./routes/progress');
 const resourcesRoutes = require('./routes/resources');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 initDatabase();
@@ -45,27 +48,35 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error', error: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`
-╔════════════════════════════════════════════════════════════════╗
-║                  🚀 MSc Dashboard Server                       ║
-║                                                                ║
-║  ✅ Server running on: http://localhost:${PORT}                  ║
-║                                                                ║
-║  📍 Open http://localhost:${PORT} in your browser                ║
-║                                                                ║
-║  🔐 Test Credentials:                                          ║
-║     Username: simon, Role: Student, Password: simon2026        ║
-║     Username: conveyor, Role: Conveyor, Password: dalvie2026   ║
-║     Username: dalvie, Role: Supervisor, Password: martin2026   ║
-║                                                                ║
-║  💡 For multi-user testing:                                    ║
-║     Open 2 browsers or 2 browser windows                       ║
-║     Login with different roles                                 ║
-║     Events and messages sync automatically!                    ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
-  `);
+// Socket.IO for real-time messaging
+const { Server } = require('socket.io');
+const io = new Server(server, { cors: { origin: '*' } });
+
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token) return next();
+    const decoded = jwt.verify(token, JWT_SECRET);
+    socket.user = decoded;
+    next();
+  } catch (err) {
+    next();
+  }
 });
 
-module.exports = app;
+io.on('connection', (socket) => {
+  const user = socket.user ? socket.user.username : 'anonymous';
+  console.log('Socket connected:', user);
+  if (socket.user && socket.user.username) {
+    socket.join(`user:${socket.user.username}`);
+  }
+});
+
+// Make io accessible to routes
+app.set('io', io);
+
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+module.exports = { app, server, io };
