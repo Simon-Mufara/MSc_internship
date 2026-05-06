@@ -40,7 +40,7 @@ async function handleResponse(response) {
   }
 }
 
-const api = {
+let api = {
   auth: {
     async login(username, password) {
       try {
@@ -272,3 +272,98 @@ function getRole() {
     return null;
   }
 }
+
+// --- Fallback mock API when backend is unreachable (for GitHub Pages) ---
+function makeMockToken(username) {
+  const payload = { username, role: 'student', iat: Date.now() };
+  return `mock.${btoa(JSON.stringify(payload))}.sig`;
+}
+
+function createMockApi() {
+  const store = {
+    users: { 'student': { password: 'password' } },
+    events: [],
+    assignments: [],
+    messages: {}
+  };
+
+  return {
+    auth: {
+      async login(username, password) {
+        // accept any username; if user exists and password matches, succeed
+        const user = store.users[username] || { password: 'password' };
+        if (password === user.password) {
+          const token = makeMockToken(username);
+          setAuthToken(token);
+          return { token };
+        }
+        throw new Error('Invalid credentials (mock)');
+      },
+      async logout() {
+        localStorage.removeItem('authToken');
+        authToken = null;
+      }
+    },
+
+    events: {
+      async getAll() { return store.events.slice(); },
+      async create(e) { e.id = Date.now().toString(); store.events.push(e); return { event: e }; },
+      async update(id, e) { const i = store.events.findIndex(x=>x.id===id); if(i>=0){store.events[i]=Object.assign(store.events[i],e); return {event:store.events[i]};} throw new Error('Not found'); },
+      async delete(id){ store.events = store.events.filter(x=>x.id!==id); return { success: true }; }
+    },
+
+    assignments: {
+      async getAll(){ return store.assignments.slice(); },
+      async create(a){ a.id = Date.now().toString(); store.assignments.push(a); return { assignment: a }; },
+      async update(id,a){ const i=store.assignments.findIndex(x=>x.id===id); if(i>=0){store.assignments[i]=Object.assign(store.assignments[i],a); return {assignment:store.assignments[i]};} throw new Error('Not found'); },
+      async delete(id){ store.assignments = store.assignments.filter(x=>x.id!==id); return { success: true }; }
+    },
+
+    messages: {
+      async getWithRecipient(recipient){ return store.messages[recipient] || []; },
+      async send(recipient, content){ store.messages[recipient]=store.messages[recipient]||[]; store.messages[recipient].push({id:Date.now().toString(),content,created_at:new Date()}); return { success: true }; }
+    },
+
+    progress: {
+      async get(userId){ return {}; },
+      async update(userId, progress){ return { success: true }; }
+    },
+
+    resources: {
+      async getByType(type){ return []; },
+      async upload(r){ return { success: true }; },
+      async delete(id){ return { success: true }; }
+    },
+
+    portfolio: {
+      async getByAuthor(a){ return []; },
+      async create(t,c,d){ return { id:Date.now().toString(), title:t, content:c, entry_date:d }; },
+      async update(id,t,c,d){ return { id, title:t, content:c, entry_date:d }; },
+      async delete(id){ return { success: true }; }
+    }
+  };
+}
+
+async function probeApi() {
+  // probe /api/health with a short timeout
+  const url = `${API_BASE.replace(/\/$/, '')}/health`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2000);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (res.ok) return true;
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Immediately check API reachability and swap to mock if unreachable
+(async function ensureApi() {
+  const ok = await probeApi();
+  if (!ok) {
+    console.warn('API not reachable at', API_BASE, '- using client-side mock API for demo on Pages.');
+    api = createMockApi();
+  }
+})();
