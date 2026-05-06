@@ -81,6 +81,8 @@ function initDatabase() {
         name TEXT NOT NULL,
         type TEXT NOT NULL CHECK(type IN ('lectures', 'recordings', 'materials')),
         size REAL,
+        data_url TEXT,
+        mime_type TEXT,
         uploaded_by TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (uploaded_by) REFERENCES users(username)

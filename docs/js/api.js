@@ -273,7 +273,10 @@ function getRole() {
   }
 }
 
-// --- Fallback mock API when backend is unreachable (for GitHub Pages) ---
+const USE_MOCK_API = Boolean(window.API_BASE_OVERRIDE ? false : window.location.hostname.endsWith('github.io'));
+window.API_IS_MOCK = USE_MOCK_API;
+
+// --- Fallback mock API for GitHub Pages ---
 function makeMockToken(username) {
   const payload = { username, role: 'student', iat: Date.now() };
   return `mock.${btoa(JSON.stringify(payload))}.sig`;
@@ -343,24 +346,7 @@ function createMockApi() {
   };
 }
 
-async function probeApi() {
-  const url = `${API_BASE.replace(/\/$/, '')}/health`;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 2000);
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
-    if (res.ok) return true;
-    return false;
-  } catch (e) {
-    return false;
-  }
+if (USE_MOCK_API) {
+  console.warn('GitHub Pages detected - using client-side mock API for demo mode.');
+  api = createMockApi();
 }
-
-(async function ensureApi() {
-  const ok = await probeApi();
-  if (!ok) {
-    console.warn('API not reachable at', API_BASE, '- using client-side mock API for demo on Pages.');
-    api = createMockApi();
-  }
-})();

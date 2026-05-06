@@ -145,6 +145,10 @@ function notify(msg, type = 'success') {
   setTimeout(() => notif.remove(), 3000);
 }
 
+function isMockApi() {
+  return Boolean(window.API_IS_MOCK);
+}
+
 function updateDate() {
   const now = new Date();
   document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', {
@@ -697,10 +701,27 @@ function handleFileUpload(event, type) {
         mimeType: file.type
       };
 
-      localLibrary.resources[type].push(item);
-      saveLocalLibrary();
-      loadResources();
-      notify(`✅ ${file.name} uploaded!`);
+      if (isMockApi()) {
+        localLibrary.resources[type].push(item);
+        saveLocalLibrary();
+        loadResources();
+        notify(`✅ ${file.name} uploaded!`);
+        return;
+      }
+
+      api.resources.upload({
+        name: file.name,
+        type,
+        size: parseFloat(item.size),
+        data_url: item.data,
+        mime_type: item.mimeType
+      }).then(() => {
+        loadResources();
+        notify(`✅ ${file.name} uploaded!`);
+      }).catch((uploadError) => {
+        console.error('Upload error:', uploadError);
+        notify('Error uploading file: ' + uploadError.message, 'error');
+      });
     };
     reader.readAsDataURL(file);
   }
@@ -731,7 +752,7 @@ async function loadResources() {
             <div class="event-item-title">📄 ${f.name}</div>
             <div class="event-item-meta">${f.size || f.fileSize || '0.00'} MB • ${f.created_at || f.date || ''}</div>
           </div>
-          ${f.data ? `<button class="btn btn-secondary btn-small" onclick="downloadLocalFile('${f.data}', '${f.name}')">Download</button>` : ''}
+          ${f.data || f.data_url ? `<button class="btn btn-secondary btn-small" onclick="downloadLocalFile('${f.data || f.data_url}', '${f.name}')">Download</button>` : ''}
           ${currentUserRole === 'conveyor' ? `<button class="btn btn-danger btn-small" onclick="deleteResource('${type}', ${f._source === 'local' ? f._localIndex : f.id}, '${f._source}')">Delete</button>` : ''}
         </div>
       `).join('') : '<p style="color: var(--text-light);">No files</p>';
