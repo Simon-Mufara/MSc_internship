@@ -163,7 +163,7 @@ function saveLocalLibrary() {
 }
 
 function getResearchPdfUrl() {
-  if (window.location.protocol === 'file:' || window.location.hostname.includes('github.io')) {
+  if (window.location.protocol === 'file:') {
     return 'public/research_focus.pdf';
   }
 
@@ -234,6 +234,7 @@ function updateUI() {
   document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
   document.getElementById('recordingUpload').style.display = canAddContent ? 'block' : 'none';
   document.getElementById('materialUpload').style.display = canAddContent ? 'block' : 'none';
+  document.getElementById('projectUpload').style.display = canAddContent ? 'block' : 'none';
   document.getElementById('assignmentCreateForm').style.display = canAddContent ? 'block' : 'none';
 
   const isSupervisor = currentUserRole === 'supervisor';
