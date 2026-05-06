@@ -286,7 +286,11 @@ function createMockApi() {
   const STORAGE_KEY = 'msc_mock_store_v1';
 
   const defaultStore = {
-    users: { 'simon': { password: 'simon2026', role: 'student' } },
+    users: {
+      'simon': { password: 'simon2026', role: 'student' },
+      'dalvie': { password: 'dalvie2026', role: 'conveyor' },
+      'martin': { password: 'martin2026', role: 'supervisor' }
+    },
     events: [],
     assignments: [],
     messages: {},
@@ -316,7 +320,7 @@ function createMockApi() {
     auth: {
       async login(username, password) {
         const expectedPassword = store.users[username]?.password || `${username}2026`;
-        const role = store.users[username]?.role || 'student';
+        const role = store.users[username]?.role || (username === 'dalvie' ? 'conveyor' : username === 'martin' ? 'supervisor' : 'student');
         if (password === expectedPassword) {
           const token = makeMockToken(username);
           setAuthToken(token);
