@@ -9,6 +9,45 @@ let appData = {
   messages: {}
 };
 
+const examTimetable = [
+  {
+    title: 'IBS6024F - Biocomputing',
+    type: 'assessment',
+    date: '2026-06-01',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilator: Hocine Bendou'
+  },
+  {
+    title: 'IBS6025F - Bioinformatic Programming with Python',
+    type: 'assessment',
+    date: '2026-06-03',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilators: Hocine Bendou, Shareefa Dalvie'
+  },
+  {
+    title: 'IBS6026F - Machine Learning and Biomedical Data Science',
+    type: 'assessment',
+    date: '2026-06-05',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer-based | Invigilator: Musalula Sinkala'
+  },
+  {
+    title: 'PTY6028F - Omics Data Generation',
+    type: 'assessment',
+    date: '2026-06-08',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+  },
+  {
+    title: 'PTY6027F - Omics Data Mining',
+    type: 'assessment',
+    date: '2026-06-10',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+  },
+  {
+    title: 'PTY6029F - Population Genomics',
+    type: 'assessment',
+    date: '2026-06-12',
+    description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+  }
+];
+
 document.addEventListener('DOMContentLoaded', async () => {
   updateDate();
   checkAuthentication();
@@ -88,9 +127,21 @@ async function initApp() {
   updateUI();
   setupNavigation();
   await loadAllData();
+  mergeExamTimetable();
   focusCalendarOnExams();
   renderCalendar();
   await updateDashboard();
+}
+
+function mergeExamTimetable() {
+  const seen = new Set(appData.events.map(event => `${event.title}|${event.date}`));
+  examTimetable.forEach(event => {
+    const key = `${event.title}|${event.date}`;
+    if (!seen.has(key)) {
+      appData.events.push({ ...event, created_by: 'dalvie', reminder: 0 });
+      seen.add(key);
+    }
+  });
 }
 
 function focusCalendarOnExams() {
@@ -107,8 +158,8 @@ function focusCalendarOnExams() {
 function updateUI() {
   const roleNames = {
     student: `👨‍🎓 ${currentUser}`,
-    conveyor: `👩‍🏫 ${currentUser}`,
-    supervisor: `👩‍💼 Prof. ${currentUser}`
+    conveyor: '👩‍🏫 Prof. Dalvie',
+    supervisor: '👩‍💼 Prof. Martin'
   };
 
   document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;
