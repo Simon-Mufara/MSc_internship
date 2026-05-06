@@ -56,6 +56,39 @@ const examTimetable = [
   }
 ];
 
+function isAuthenticated() {
+  return typeof api !== 'undefined' && typeof api.auth !== 'undefined' && !!localStorage.getItem('authToken');
+}
+
+function getUsername() {
+  if (!localStorage.getItem('authToken')) return null;
+  try {
+    const payload = JSON.parse(atob(localStorage.getItem('authToken').split('.')[1]));
+    return payload.username;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getRole() {
+  if (!localStorage.getItem('authToken')) return null;
+  try {
+    const payload = JSON.parse(atob(localStorage.getItem('authToken').split('.')[1]));
+    return payload.role;
+  } catch (error) {
+    return null;
+  }
+}
+
+function checkAuthentication() {
+  if (isAuthenticated()) {
+    currentUser = getUsername();
+    currentUserRole = getRole();
+    showApp();
+    initApp();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   updateDate();
   checkAuthentication();
