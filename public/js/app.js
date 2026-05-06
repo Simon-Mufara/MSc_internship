@@ -85,13 +85,34 @@ async function handleLogin(event) {
   const password = document.getElementById('passwordInput').value;
 
   try {
+    if (!username || !password) {
+      showError('Please enter username and password');
+      return;
+    }
+    
+    console.log('Attempting login for:', username);
     const result = await api.auth.login(username, password);
+    console.log('Login successful:', result);
+    
+    if (!result.user) {
+      throw new Error('No user data returned from server');
+    }
+    
     currentUser = result.user.username;
     currentUserRole = result.user.role;
+    console.log('User logged in as:', currentUser, 'with role:', currentUserRole);
     showApp();
     initApp();
   } catch (error) {
-    showError(error.message || 'Login failed');
+    console.error('Login error:', error);
+    const errorMsg = error.message || 'Login failed';
+    if (errorMsg.includes('fetch')) {
+      showError('Cannot connect to server. Make sure the server is running.');
+    } else if (errorMsg.includes('401') || errorMsg.includes('Invalid')) {
+      showError('Invalid username or password');
+    } else {
+      showError(errorMsg);
+    }
   }
 }
 

@@ -1,4 +1,15 @@
-const API_BASE = 'http://localhost:5000/api';
+// Determine API base URL based on environment
+let API_BASE = 'http://localhost:5000/api';
+
+// If on deployed site (not localhost), try current domain
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  API_BASE = `${window.location.protocol}//${window.location.host}/api`;
+}
+
+// Allow manual override via window.API_BASE_OVERRIDE for custom deployments
+if (window.API_BASE_OVERRIDE) {
+  API_BASE = window.API_BASE_OVERRIDE;
+}
 
 let authToken = localStorage.getItem('authToken');
 
@@ -15,26 +26,41 @@ function getAuthHeaders() {
 }
 
 async function handleResponse(response) {
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'API request failed');
+  try {
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || `API error: ${response.status}`);
+    }
+    return response.json();
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error('Server returned invalid data');
+    }
+    throw err;
   }
-  return response.json();
 }
 
 const api = {
   auth: {
     async login(username, password) {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await handleResponse(response);
-      if (data.token) {
-        setAuthToken(data.token);
+      try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await handleResponse(response);
+        if (data.token) {
+          setAuthToken(data.token);
+        }
+        return data;
+      } catch (err) {
+        console.error('Login fetch error:', err);
+        if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+          throw new Error(`Cannot reach server at ${API_BASE}. Ensure server is running.`);
+        }
+        throw err;
       }
-      return data;
     },
 
     async logout() {
