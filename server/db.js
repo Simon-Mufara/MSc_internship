@@ -101,7 +101,11 @@ function initializeDefaultUsers() {
   users.forEach(user => {
     const passwordHash = bcrypt.hashSync(user.password, 10);
     db.run(
-      `INSERT OR IGNORE INTO users (username, role, password_hash) VALUES (?, ?, ?)`,
+      `INSERT INTO users (username, role, password_hash)
+       VALUES (?, ?, ?)
+       ON CONFLICT(username) DO UPDATE SET
+         role = excluded.role,
+         password_hash = excluded.password_hash`,
       [user.username, user.role, passwordHash],
       (err) => {
         if (err) console.error(`Error creating user ${user.username}:`, err.message);

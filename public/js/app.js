@@ -88,8 +88,20 @@ async function initApp() {
   updateUI();
   setupNavigation();
   await loadAllData();
+  focusCalendarOnExams();
   renderCalendar();
   await updateDashboard();
+}
+
+function focusCalendarOnExams() {
+  const examEvents = appData.events
+    .filter(event => event.type === 'assessment')
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  if (examEvents.length > 0) {
+    const firstExamDate = new Date(`${examEvents[0].date}T00:00:00`);
+    currentMonth = new Date(firstExamDate.getFullYear(), firstExamDate.getMonth(), 1);
+  }
 }
 
 function updateUI() {
