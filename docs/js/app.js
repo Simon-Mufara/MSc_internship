@@ -898,7 +898,8 @@ async function loadPortfolio() {
       <iframe
         src="research_command_centre.html"
         title="Research Command Centre"
-        style="width: 100%; min-height: 1100px; border: 1px solid var(--border); border-radius: 10px; background: #fff;"
+        style="width: 100%; min-height: 1100px; border: 1px solid var(--border); border-radius: 10px; background: #fff; display: block;"
+        onload="this.style.height=(this.contentDocument.body.scrollHeight + 40) + 'px';"
       ></iframe>
     </div>
   `;
