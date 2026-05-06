@@ -1724,11 +1724,16 @@
         }
 
         function getResearchPdfUrl() {
-            if (window.location.protocol === 'file:') {
-                return 'public/research_focus.pdf';
-            }
+            // Prefer relative paths so the PDF resolves under project pages on GitHub Pages.
+            const candidates = [
+                './research_focus.pdf',
+                'research_focus.pdf',
+                './public/research_focus.pdf',
+                'public/research_focus.pdf',
+                '/research_focus.pdf'
+            ];
 
-            return '/research_focus.pdf';
+            return candidates[0];
         }
 
         // ==================== STORAGE ====================

@@ -163,11 +163,18 @@ function saveLocalLibrary() {
 }
 
 function getResearchPdfUrl() {
-  if (window.location.protocol === 'file:') {
-    return 'public/research_focus.pdf';
-  }
+  // Try relative paths so the PDF resolves correctly on GitHub Pages
+  // (project pages use a repo subpath, so leading '/' can break the path).
+  const candidates = [
+    './research_focus.pdf',
+    'research_focus.pdf',
+    './public/research_focus.pdf',
+    'public/research_focus.pdf',
+    '/research_focus.pdf'
+  ];
 
-  return '/research_focus.pdf';
+  // Return the first candidate (relative paths will work for project pages).
+  return candidates[0];
 }
 
 function ensureDefaultResearchProject() {
