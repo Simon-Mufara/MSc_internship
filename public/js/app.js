@@ -305,12 +305,16 @@ function updateUI() {
   document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;
   document.getElementById('userDisplay').textContent = `Logged in as ${roleNames[currentUserRole] || currentUser}`;
 
-  const canAddContent = currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
-  document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
-  document.getElementById('recordingUpload').style.display = canAddContent ? 'block' : 'none';
-  document.getElementById('materialUpload').style.display = canAddContent ? 'block' : 'none';
-  document.getElementById('projectUpload').style.display = canAddContent ? 'block' : 'none';
-  document.getElementById('assignmentCreateForm').style.display = canAddContent ? 'block' : 'none';
+  // Students can upload materials; conveyor/supervisor can upload all content types
+  const canUploadMaterials = currentUserRole === 'student' || currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
+  const canUploadLectures = currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
+  const canAddAssignments = currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
+  
+  document.getElementById('lectureUpload').style.display = canUploadLectures ? 'block' : 'none';
+  document.getElementById('recordingUpload').style.display = canUploadLectures ? 'block' : 'none';
+  document.getElementById('materialUpload').style.display = canUploadMaterials ? 'block' : 'none';
+  document.getElementById('projectUpload').style.display = canUploadLectures ? 'block' : 'none';
+  document.getElementById('assignmentCreateForm').style.display = canAddAssignments ? 'block' : 'none';
 
   const isSupervisor = currentUserRole === 'supervisor';
   document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
@@ -342,6 +346,7 @@ async function switchSection(section) {
     calendar: '📅 Calendar',
     resources: '📁 Resources',
     projects: '📁 Projects',
+    portfolio: '📓 Portfolio',
     assignments: '✏️ Assignments',
     progress: '📈 Progress',
     messages: '💬 Messages'
@@ -376,6 +381,9 @@ async function switchSection(section) {
         loadMessages('supervisor');
       }, 3000);
     }
+  } else if (section === 'portfolio') {
+    await loadPortfolio();
+    if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   }
 }
 
@@ -873,5 +881,99 @@ async function updateDashboard() {
     document.getElementById('stat-messages').textContent = totalMessages;
   } catch (error) {
     console.error('Error updating dashboard:', error);
+  }
+}
+
+// PORTFOLIO
+async function loadPortfolio() {
+  try {
+    // Load current user's portfolio if student, otherwise load simon's
+    const author = currentUserRole === 'student' ? currentUser : 'simon';
+    const entries = await api.portfolio.getByAuthor(author);
+    
+    let html = '';
+    if (currentUserRole === 'student') {
+      // Student view: show input and list
+      html = `
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-title">✍️ Write New Portfolio Entry</div>
+          <div class="form-group">
+            <label>Entry Date</label>
+            <input type="date" id="portfolioDate" value="${new Date().toISOString().split('T')[0]}">
+          </div>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="portfolioTitle" placeholder="Entry title">
+          </div>
+          <div class="form-group">
+            <label>What did you accomplish today?</label>
+            <textarea id="portfolioContent" placeholder="Write your daily portfolio entry..." style="min-height: 150px;"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="savePortfolioEntry()">Save Entry</button>
+        </div>
+      `;
+    }
+    
+    html += `
+      <div class="card">
+        <div class="card-title">${author === 'simon' ? "📓 Simon's Portfolio" : '📓 My Portfolio'}</div>
+        <div style="margin-bottom: 15px; padding: 12px; background: var(--light); border-radius: 6px; font-size: 12px; color: var(--text-light);">
+          ${currentUserRole !== 'student' ? `Portfolio entries from Simon for tracking daily progress` : 'Track your daily activities and accomplishments'}
+        </div>
+        <div id="portfolioEntries">${entries.length ? '' : '<p style="color: var(--text-light);">No portfolio entries yet</p>'}</div>
+      </div>
+    `;
+    
+    document.getElementById('portfolioSection').innerHTML = html;
+    
+    // Render entries
+    if (entries.length > 0) {
+      document.getElementById('portfolioEntries').innerHTML = entries.map((e, i) => `
+        <div class="event-item" style="border-left-color: var(--primary);">
+          <div class="event-item-content">
+            <div class="event-item-title">${e.title}</div>
+            <div class="event-item-meta">📅 ${new Date(e.entry_date).toLocaleDateString()} | Posted ${new Date(e.created_at).toLocaleDateString()}</div>
+            <div style="margin-top: 12px; padding: 12px; background: var(--light); border-radius: 6px; line-height: 1.6;">${e.content}</div>
+          </div>
+          ${currentUserRole === 'student' ? `<button class="btn btn-danger btn-small" onclick="deletePortfolioEntry(${e.id})">Delete</button>` : ''}
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    console.error('Error loading portfolio:', error);
+    document.getElementById('portfolioSection').innerHTML = `<p style="color: red;">Error loading portfolio: ${error.message}</p>`;
+  }
+}
+
+async function savePortfolioEntry() {
+  const title = document.getElementById('portfolioTitle').value.trim();
+  const content = document.getElementById('portfolioContent').value.trim();
+  const entry_date = document.getElementById('portfolioDate').value;
+  
+  if (!title || !content || !entry_date) {
+    notify('Please fill in all fields', 'error');
+    return;
+  }
+  
+  try {
+    await api.portfolio.create(title, content, entry_date);
+    notify('✅ Portfolio entry saved!');
+    document.getElementById('portfolioTitle').value = '';
+    document.getElementById('portfolioContent').value = '';
+    await loadPortfolio();
+  } catch (error) {
+    notify(`Error: ${error.message}`, 'error');
+  }
+}
+
+async function deletePortfolioEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  
+  try {
+    await api.portfolio.delete(id);
+    notify('✅ Entry deleted');
+    await loadPortfolio();
+  } catch (error) {
+    notify(`Error: ${error.message}`, 'error');
   }
 }

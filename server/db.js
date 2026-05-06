@@ -85,6 +85,19 @@ function initDatabase() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (uploaded_by) REFERENCES users(username)
       )
+    `);
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS portfolio (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        author TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        entry_date TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (author) REFERENCES users(username)
+      )
     `, () => {
       initializeDefaultUsers();
     });

@@ -13,6 +13,7 @@ const assignmentsRoutes = require('./routes/assignments');
 const messagesRoutes = require('./routes/messages');
 const progressRoutes = require('./routes/progress');
 const resourcesRoutes = require('./routes/resources');
+const portfolioRoutes = require('./routes/portfolio');
 
 const app = express();
 const server = http.createServer(app);
@@ -38,6 +39,7 @@ app.use('/api/assignments', assignmentsRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/resources', resourcesRoutes);
+app.use('/api/portfolio', portfolioRoutes);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

@@ -209,6 +209,43 @@ const api = {
       });
       return handleResponse(response);
     }
+  },
+
+  portfolio: {
+    async getByAuthor(author) {
+      const response = await fetch(`${API_BASE}/portfolio/${author}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      const data = await handleResponse(response);
+      return data.entries || [];
+    },
+
+    async create(title, content, entry_date) {
+      const response = await fetch(`${API_BASE}/portfolio`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ title, content, entry_date })
+      });
+      return handleResponse(response);
+    },
+
+    async update(id, title, content, entry_date) {
+      const response = await fetch(`${API_BASE}/portfolio/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ title, content, entry_date })
+      });
+      return handleResponse(response);
+    },
+
+    async delete(id) {
+      const response = await fetch(`${API_BASE}/portfolio/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      return handleResponse(response);
+    }
   }
 };
 
