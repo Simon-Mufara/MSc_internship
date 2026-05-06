@@ -896,7 +896,7 @@ async function loadPortfolio() {
         Embedded research dashboard page. It includes the custom command centre layout, tabs, and weekly planning board you provided.
       </div>
       <iframe
-        src="../research_command_centre.html"
+        src="research_command_centre.html"
         title="Research Command Centre"
         style="width: 100%; min-height: 1100px; border: 1px solid var(--border); border-radius: 10px; background: #fff;"
       ></iframe>
