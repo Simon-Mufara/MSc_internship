@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSc Study Platform - UCT & UFS Collaboration</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-page">
+        <div class="login-box">
+            <h1>📚 MSc Study Platform</h1>
+            <p class="subtitle">UCT Masters & UFS Internship</p>
+
+            <label style="display: block; margin-bottom: 15px; font-weight: 600; color: var(--primary);">Username:</label>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <input type="text" id="usernameInput" placeholder="Enter your username" required>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="passwordInput" required>
+                </div>
+                <button type="submit" class="login-submit" id="loginBtn">Login</button>
+                <div class="error-msg" id="errorMsg"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="appContainer" class="app-wrapper" style="display: none;">
+        <div class="app-container">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>📚 Platform</h2>
+                    <p>MSc Dashboard</p>
+                    <div class="user-badge" id="userBadge">Loading...</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
+                    <div class="nav-item" data-section="calendar">📅 Calendar</div>
+                    <div class="nav-item" data-section="resources">📁 Resources</div>
+                    <div class="nav-item" data-section="projects">📑 Projects</div>
+                    <div class="nav-item" data-section="portfolio">📓 Portfolio</div>
+                    <div class="nav-item" data-section="assignments">✏️ Assignments</div>
+                    <div class="nav-item" data-section="progress">📈 Progress</div>
+                    <div class="nav-item" data-section="messages">💬 Messages</div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div class="main-content">
+                <div class="topbar">
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <div class="topbar-info">
+                        <span id="userDisplay">Logged in as Student</span>
+                        <span id="dateDisplay"></span>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <!-- DASHBOARD -->
+                    <div class="section active" id="dashboardSection">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-events">0</div>
+                                <div class="stat-label">Calendar Events</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-assignments">0</div>
+                                <div class="stat-label">Active Assignments</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-progress">0%</div>
+                                <div class="stat-label">Overall Progress</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-messages">0</div>
+                                <div class="stat-label">Total Messages</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">📌 Upcoming Events (Next 7 Days)</div>
+                            <div id="upcomingEventsList" class="events-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- CALENDAR -->
+                    <div class="section" id="calendarSection">
+                        <div class="calendar-wrapper">
+                            <div class="calendar-header">
+                                <h3 id="calendarMonth"></h3>
+                                <div class="calendar-controls">
+                                    <button class="btn btn-secondary btn-small" onclick="previousMonth()">← Prev</button>
+                                    <button class="btn btn-secondary btn-small" onclick="todayMonth()">Today</button>
+                                    <button class="btn btn-secondary btn-small" onclick="nextMonth()">Next →</button>
+                                    <button class="btn btn-primary btn-small" onclick="openEventModal(null)" id="addEventBtn">+ Add Event</button>
+                                </div>
+                            </div>
+                            <div class="calendar-grid" id="calendarGrid"></div>
+                            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border);">
+                                <h4 style="color: var(--primary); margin-bottom: 15px;">Legend:</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 20px; height: 20px; background: #ff6b6b; border-radius: 3px;"></div><span style="font-size: 13px;">Assessment</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 20px; height: 20px; background: #ffa500; border-radius: 3px;"></div><span style="font-size: 13px;">Deadline</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 20px; height: 20px; background: #4ecdc4; border-radius: 3px;"></div><span style="font-size: 13px;">Work Event</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 20px; height: 20px; background: #4a90e2; border-radius: 3px;"></div><span style="font-size: 13px;">Class</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title">📋 All Events</div>
+                            <div id="allEventsList" class="events-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- RESOURCES -->
+                    <div class="section" id="resourcesSection">
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('lectures')">📊 Lectures</button>
+                            <button class="tab" onclick="switchTab('recordings')">🎥 Recordings</button>
+                            <button class="tab" onclick="switchTab('materials')">📚 Materials</button>
+                        </div>
+                        <div class="tab-content active" id="lecturesTab">
+                            <div class="card">
+                                <div id="lectureUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('lectureFile').click()"><p>📤 Click to upload lecture slides</p></div>
+                                    <input type="file" id="lectureFile" style="display: none;" onchange="handleFileUpload(event, 'lectures')">
+                                </div>
+                                <div id="lecturesList"></div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="recordingsTab">
+                            <div class="card">
+                                <div id="recordingUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('recordingFile').click()"><p>📤 Click to upload recordings</p></div>
+                                    <input type="file" id="recordingFile" style="display: none;" onchange="handleFileUpload(event, 'recordings')">
+                                </div>
+                                <div id="recordingsList"></div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="materialsTab">
+                            <div class="card">
+                                <div id="materialUpload" style="display: none; margin-bottom: 20px;">
+                                    <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('materialFile').click()"><p>📤 Click to upload materials</p></div>
+                                    <input type="file" id="materialFile" style="display: none;" onchange="handleFileUpload(event, 'materials')">
+                                </div>
+                                <div id="materialsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROJECTS -->
+                    <div class="section" id="projectsSection">
+                        <div class="card">
+                            <div class="card-title">📑 Research Projects</div>
+                            <div style="margin-bottom: 18px; padding: 16px; background: var(--light); border-radius: 8px; border-left: 4px solid var(--accent);">
+                                <strong>Current focus:</strong> Research work supervised by Prof. Nicole Mulder.
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Project Title</label>
+                                        <input type="text" id="projectTitleInput" placeholder="Enter project title">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Description</label>
+                                        <textarea id="projectDescriptionInput" placeholder="Describe the project" style="min-height: 90px;"></textarea>
+                                    </div>
+                                    <div id="projectUpload" style="margin-bottom: 12px; padding: 18px; background: var(--light); border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('projectFileInput').click()">
+                                        <p>📄 Click to upload a PDF project file</p>
+                                    </div>
+                                    <input type="file" id="projectFileInput" accept="application/pdf" style="display: none;" onchange="handleProjectUpload(event)">
+                                </div>
+                                <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+                                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="projectPreviewTitle">No project selected</div>
+                                    <iframe id="projectPdfViewer" title="Project PDF Preview" style="width: 100%; height: 340px; border: 0;"></iframe>
+                                </div>
+                            </div>
+                            <div id="projectsList" style="margin-top: 20px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- PORTFOLIO -->
+                    <div class="section" id="portfolioSection">
+                    </div>
+
+                    <!-- ASSIGNMENTS -->
+                    <div class="section" id="assignmentsSection">
+                        <div class="card">
+                            <div class="card-title">✏️ Assignments</div>
+                            <div id="assignmentCreateForm" style="display: none; margin-bottom: 20px; padding: 20px; background: var(--light); border-radius: 8px;">
+                                <input type="text" id="assignTitle" placeholder="Assignment title" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%; display: block;">
+                                <textarea id="assignDesc" placeholder="Description" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%; min-height: 80px; display: block;"></textarea>
+                                <input type="date" id="assignDue" style="margin-bottom: 10px; padding: 10px; border: 2px solid var(--border); border-radius: 6px; width: 100%; display: block;">
+                                <button class="btn btn-primary" onclick="createAssignment()" style="width: 100%;">Create Assignment</button>
+                            </div>
+                            <div id="assignmentsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- PROGRESS -->
+                    <div class="section" id="progressSection">
+                        <div class="card">
+                            <div class="card-title">📈 Your Progress</div>
+                            <div class="form-group">
+                                <label>Monthly Update</label>
+                                <textarea id="monthlyUpdate" placeholder="Write your progress update..." style="min-height: 120px;" onchange="saveProgress()"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>PTY6027F Progress (%)</label>
+                                <input type="number" id="pty6027" min="0" max="100" value="0" onchange="saveProgress()">
+                            </div>
+                            <div class="form-group">
+                                <label>PTY6028F Progress (%)</label>
+                                <input type="number" id="pty6028" min="0" max="100" value="0" onchange="saveProgress()">
+                            </div>
+                            <div id="supervisorFeedback" style="display: none; margin-top: 20px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid var(--blue);">
+                                <label style="color: var(--blue); font-weight: 600;">📝 Supervisor Feedback</label>
+                                <textarea id="feedbackArea" placeholder="Enter your feedback..." style="margin-top: 10px; min-height: 100px; display: block; width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 6px;" onchange="saveProgress()"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MESSAGES -->
+                    <div class="section" id="messagesSection">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="card">
+                                <div class="card-title">💬 Messages with Conveyor</div>
+                                <div id="conveyorMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+                                <div style="display: flex; gap: 10px;">
+                                    <textarea id="conveyorMsg" placeholder="Type message..." style="flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 6px; min-height: 60px;"></textarea>
+                                    <button class="btn btn-primary" onclick="sendMessage('conveyor')">Send</button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">💬 Messages with Supervisor</div>
+                                <div id="supervisorMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+                                <div style="display: flex; gap: 10px;">
+                                    <textarea id="supervisorMsg" placeholder="Type message..." style="flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 6px; min-height: 60px;"></textarea>
+                                    <button class="btn btn-primary" onclick="sendMessage('supervisor')">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENT MODAL -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Event</h3>
+                <button class="modal-close" onclick="closeEventModal()">&times;</button>
+            </div>
+            <form id="eventForm" onsubmit="saveEvent(event)">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select id="eventType" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="assessment">📌 Assessment</option>
+                        <option value="deadline">⏰ Deadline</option>
+                        <option value="work">💼 Work Event</option>
+                        <option value="class">📚 Class</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" id="eventStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="eventEnd">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDesc" style="min-height: 100px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" id="eventReminder"> Send reminder notification</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Save Event</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn" style="display: none;" onclick="deleteEvent()">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
