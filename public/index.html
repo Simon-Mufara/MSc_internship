@@ -44,6 +44,7 @@
                     <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
                     <div class="nav-item" data-section="calendar">📅 Calendar</div>
                     <div class="nav-item" data-section="resources">📁 Resources</div>
+                    <div class="nav-item" data-section="projects">📑 Projects</div>
                     <div class="nav-item" data-section="assignments">✏️ Assignments</div>
                     <div class="nav-item" data-section="progress">📈 Progress</div>
                     <div class="nav-item" data-section="messages">💬 Messages</div>
@@ -133,7 +134,7 @@
                             <div class="card">
                                 <div id="lectureUpload" style="display: none; margin-bottom: 20px;">
                                     <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('lectureFile').click()"><p>📤 Click to upload lecture slides</p></div>
-                                    <input type="file" id="lectureFile" style="display: none;">
+                                    <input type="file" id="lectureFile" style="display: none;" onchange="handleFileUpload(event, 'lectures')">
                                 </div>
                                 <div id="lecturesList"></div>
                             </div>
@@ -142,7 +143,7 @@
                             <div class="card">
                                 <div id="recordingUpload" style="display: none; margin-bottom: 20px;">
                                     <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('recordingFile').click()"><p>📤 Click to upload recordings</p></div>
-                                    <input type="file" id="recordingFile" style="display: none;">
+                                    <input type="file" id="recordingFile" style="display: none;" onchange="handleFileUpload(event, 'recordings')">
                                 </div>
                                 <div id="recordingsList"></div>
                             </div>
@@ -151,10 +152,41 @@
                             <div class="card">
                                 <div id="materialUpload" style="display: none; margin-bottom: 20px;">
                                     <div style="background: var(--light); padding: 20px; border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('materialFile').click()"><p>📤 Click to upload materials</p></div>
-                                    <input type="file" id="materialFile" style="display: none;">
+                                    <input type="file" id="materialFile" style="display: none;" onchange="handleFileUpload(event, 'materials')">
                                 </div>
                                 <div id="materialsList"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- PROJECTS -->
+                    <div class="section" id="projectsSection">
+                        <div class="card">
+                            <div class="card-title">📑 Research Projects</div>
+                            <div style="margin-bottom: 18px; padding: 16px; background: var(--light); border-radius: 8px; border-left: 4px solid var(--accent);">
+                                <strong>Current focus:</strong> Research work supervised by Prof. Nicole Mulder.
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Project Title</label>
+                                        <input type="text" id="projectTitleInput" placeholder="Enter project title">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Description</label>
+                                        <textarea id="projectDescriptionInput" placeholder="Describe the project" style="min-height: 90px;"></textarea>
+                                    </div>
+                                    <div id="projectUpload" style="margin-bottom: 12px; padding: 18px; background: var(--light); border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('projectFileInput').click()">
+                                        <p>📄 Click to upload a PDF project file</p>
+                                    </div>
+                                    <input type="file" id="projectFileInput" accept="application/pdf" style="display: none;" onchange="handleProjectUpload(event)">
+                                </div>
+                                <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+                                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="projectPreviewTitle">No project selected</div>
+                                    <iframe id="projectPdfViewer" title="Project PDF Preview" style="width: 100%; height: 340px; border: 0;"></iframe>
+                                </div>
+                            </div>
+                            <div id="projectsList" style="margin-top: 20px;"></div>
                         </div>
                     </div>
 

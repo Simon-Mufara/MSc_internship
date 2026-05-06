@@ -9,6 +9,11 @@ let appData = {
   messages: {}
 };
 
+let localLibrary = {
+  resources: { lectures: [], recordings: [], materials: [] },
+  projects: []
+};
+
 const examTimetable = [
   {
     title: 'IBS6024F - Biocomputing',
@@ -126,11 +131,58 @@ function updateDate() {
 async function initApp() {
   updateUI();
   setupNavigation();
+  loadLocalLibrary();
   await loadAllData();
   mergeExamTimetable();
   focusCalendarOnExams();
   renderCalendar();
   await updateDashboard();
+  await renderProjects();
+}
+
+function loadLocalLibrary() {
+  const saved = localStorage.getItem('localLibrary');
+  if (!saved) {
+    ensureDefaultResearchProject();
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    localLibrary.resources = parsed.resources || localLibrary.resources;
+    localLibrary.projects = parsed.projects || [];
+  } catch (error) {
+    console.error('Error loading local library:', error);
+  }
+
+  ensureDefaultResearchProject();
+}
+
+function saveLocalLibrary() {
+  localStorage.setItem('localLibrary', JSON.stringify(localLibrary));
+}
+
+function getResearchPdfUrl() {
+  return window.location.protocol === 'file:'
+    ? 'public/research_focus.pdf'
+    : '/research_focus.pdf';
+}
+
+function ensureDefaultResearchProject() {
+  localLibrary.projects = localLibrary.projects || [];
+  const exists = localLibrary.projects.some(project => project.locked && project.title === 'Current Research Focus');
+
+  if (!exists) {
+    localLibrary.projects.unshift({
+      title: 'Current Research Focus',
+      description: 'Research focus supervised by Prof. Nicole Mulder',
+      fileUrl: getResearchPdfUrl(),
+      uploadedAt: 'Always available',
+      supervisor: 'Prof. Nicole Mulder',
+      locked: true
+    });
+    saveLocalLibrary();
+  }
 }
 
 function mergeExamTimetable() {
@@ -155,6 +207,17 @@ function focusCalendarOnExams() {
   }
 }
 
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateOnly(dateString) {
+  return new Date(`${dateString}T00:00:00`);
+}
+
 function updateUI() {
   const roleNames = {
     student: `👨‍🎓 ${currentUser}`,
@@ -163,7 +226,7 @@ function updateUI() {
   };
 
   document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;
-  document.getElementById('userDisplay').textContent = `Logged in as ${currentUserRole}`;
+  document.getElementById('userDisplay').textContent = `Logged in as ${roleNames[currentUserRole] || currentUser}`;
 
   const canAddContent = currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
   document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
@@ -200,6 +263,7 @@ async function switchSection(section) {
     dashboard: '📊 Dashboard',
     calendar: '📅 Calendar',
     resources: '📁 Resources',
+    projects: '📁 Projects',
     assignments: '✏️ Assignments',
     progress: '📈 Progress',
     messages: '💬 Messages'
@@ -216,6 +280,8 @@ async function switchSection(section) {
     await loadAssignments();
   } else if (section === 'resources') {
     await loadResources();
+  } else if (section === 'projects') {
+    await renderProjects();
   } else if (section === 'messages') {
     await loadMessages('conveyor');
     await loadMessages('supervisor');
@@ -257,7 +323,7 @@ function renderCalendar() {
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
     const isToday = date.toDateString() === today.toDateString();
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateKey(date);
     const dayEvents = appData.events.filter(e => e.date === dateStr);
 
     html += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="openEventModal('${dateStr}')">
@@ -372,7 +438,7 @@ async function renderAllEvents() {
       <div class="event-item-content">
         <div class="event-item-title">${e.title}</div>
         <div class="event-item-meta">
-          📅 ${new Date(e.date).toLocaleDateString()} |
+          📅 ${parseDateOnly(e.date).toLocaleDateString()} |
           <span style="display: inline-block; padding: 2px 6px; background: var(--light); border-radius: 3px; margin: 0 4px;">
             ${e.type}
           </span>
@@ -433,7 +499,7 @@ async function loadAssignments() {
       <div class="event-item" style="border-left-color: var(--warning);">
         <div class="event-item-content">
           <div class="event-item-title">${a.title}</div>
-          <div class="event-item-meta">Due: ${new Date(a.due_date).toLocaleDateString()} | Status: ${a.status}</div>
+          <div class="event-item-meta">Due: ${parseDateOnly(a.due_date).toLocaleDateString()} | Status: ${a.status}</div>
           <div style="margin-top: 8px; font-size: 13px; color: var(--text);">${a.description}</div>
         </div>
       </div>
@@ -517,17 +583,57 @@ function switchTab(tab) {
   event.target.classList.add('active');
 }
 
+function handleFileUpload(event, type) {
+  const files = event.target.files;
+  if (!files || !files.length) return;
+
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const item = {
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2),
+        date: new Date().toLocaleDateString(),
+        data: e.target.result,
+        mimeType: file.type
+      };
+
+      localLibrary.resources[type].push(item);
+      saveLocalLibrary();
+      loadResources();
+      notify(`✅ ${file.name} uploaded!`);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  event.target.value = '';
+}
+
+function getCombinedResources(type) {
+  const apiItems = (window._apiResources && window._apiResources[type]) || [];
+  const localItems = localLibrary.resources[type] || [];
+
+  return [
+    ...localItems.map((item, index) => ({ ...item, _source: 'local', _localIndex: index })),
+    ...apiItems.map(item => ({ ...item, _source: 'api' }))
+  ];
+}
+
 async function loadResources() {
   try {
+    window._apiResources = window._apiResources || { lectures: [], recordings: [], materials: [] };
     for (let type of ['lectures', 'recordings', 'materials']) {
       const resources = await api.resources.getByType(type);
-      const html = resources.length ? resources.map((f, i) => `
+      window._apiResources[type] = resources;
+      const combined = getCombinedResources(type);
+      const html = combined.length ? combined.map((f, i) => `
         <div class="event-item">
           <div class="event-item-content">
             <div class="event-item-title">📄 ${f.name}</div>
-            <div class="event-item-meta">${f.size} MB • ${f.created_at}</div>
+            <div class="event-item-meta">${f.size || f.fileSize || '0.00'} MB • ${f.created_at || f.date || ''}</div>
           </div>
-          ${currentUserRole === 'conveyor' ? `<button class="btn btn-danger btn-small" onclick="deleteResource('${type}', ${f.id})">Delete</button>` : ''}
+          ${f.data ? `<button class="btn btn-secondary btn-small" onclick="downloadLocalFile('${f.data}', '${f.name}')">Download</button>` : ''}
+          ${currentUserRole === 'conveyor' ? `<button class="btn btn-danger btn-small" onclick="deleteResource('${type}', ${f._source === 'local' ? f._localIndex : f.id}, '${f._source}')">Delete</button>` : ''}
         </div>
       `).join('') : '<p style="color: var(--text-light);">No files</p>';
 
@@ -538,14 +644,105 @@ async function loadResources() {
   }
 }
 
-async function deleteResource(type, id) {
+async function deleteResource(type, id, source = 'api') {
   try {
+    if (source === 'local') {
+      const localItems = localLibrary.resources[type] || [];
+      localItems.splice(id, 1);
+      saveLocalLibrary();
+      await loadResources();
+      notify('Resource deleted');
+      return;
+    }
+
     await api.resources.delete(id);
     await loadResources();
     notify('Resource deleted');
   } catch (error) {
     notify('Error deleting resource: ' + error.message, 'error');
   }
+}
+
+function downloadLocalFile(data, name) {
+  const link = document.createElement('a');
+  link.href = data;
+  link.download = name;
+  link.click();
+}
+
+function handleProjectUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const titleInput = document.getElementById('projectTitleInput');
+  const descriptionInput = document.getElementById('projectDescriptionInput');
+  const title = titleInput.value.trim() || file.name.replace(/\.pdf$/i, '');
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    localLibrary.projects.push({
+      title,
+      description: descriptionInput.value.trim(),
+      fileName: file.name,
+      fileData: e.target.result,
+      uploadedAt: new Date().toLocaleDateString(),
+      supervisor: 'Prof. Nicole Mulder'
+    });
+
+    saveLocalLibrary();
+    titleInput.value = '';
+    descriptionInput.value = '';
+    event.target.value = '';
+    renderProjects();
+    notify('✅ Project PDF added!');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function renderProjects() {
+  const list = document.getElementById('projectsList');
+  const viewer = document.getElementById('projectPdfViewer');
+  if (!list || !viewer) return;
+
+  const projects = localLibrary.projects || [];
+  if (!projects.length) {
+    list.innerHTML = '<p style="color: var(--text-light);">No project PDFs uploaded yet</p>';
+    viewer.src = 'about:blank';
+    document.getElementById('projectPreviewTitle').textContent = 'No project selected';
+    return;
+  }
+
+  list.innerHTML = projects.map((project, index) => `
+    <div class="event-item">
+      <div class="event-item-content">
+        <div class="event-item-title">📄 ${project.title}</div>
+        <div class="event-item-meta">Supervisor: ${project.supervisor} • ${project.uploadedAt}</div>
+        <div style="margin-top: 8px; color: var(--text);">${project.description || ''}</div>
+      </div>
+      <button class="btn btn-primary btn-small" onclick="viewProject(${index})">View PDF</button>
+      ${project.fileData ? `<button class="btn btn-secondary btn-small" onclick="downloadLocalFile('${project.fileData}', '${project.fileName}')">Download</button>` : `<button class="btn btn-secondary btn-small" onclick="window.open('${project.fileUrl}', '_blank')">Open</button>`}
+      ${project.locked ? '' : `<button class="btn btn-danger btn-small" onclick="deleteProject(${index})">Delete</button>`}
+    </div>
+  `).join('');
+
+  viewProject(0);
+}
+
+function viewProject(index) {
+  const project = localLibrary.projects[index];
+  if (!project) return;
+
+  const viewer = document.getElementById('projectPdfViewer');
+  const title = document.getElementById('projectPreviewTitle');
+  viewer.src = project.fileData || project.fileUrl;
+  title.textContent = project.title;
+}
+
+function deleteProject(index) {
+  if (localLibrary.projects[index]?.locked) return;
+  localLibrary.projects.splice(index, 1);
+  saveLocalLibrary();
+  renderProjects();
 }
 
 // DASHBOARD
@@ -555,7 +752,7 @@ async function updateDashboard() {
     const today = new Date();
     const upcoming = appData.events
       .filter(e => {
-        const eDate = new Date(e.date);
+        const eDate = parseDateOnly(e.date);
         return eDate >= today && eDate <= new Date(today.getTime() + upcomingDays * 24 * 60 * 60 * 1000);
       })
       .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -571,7 +768,7 @@ async function updateDashboard() {
       <div class="event-item">
         <div class="event-item-content">
           <div class="event-item-title">${e.title}</div>
-          <div class="event-item-meta">📅 ${new Date(e.date).toLocaleDateString()} | ${e.type}</div>
+          <div class="event-item-meta">📅 ${parseDateOnly(e.date).toLocaleDateString()} | ${e.type}</div>
         </div>
       </div>
     `).join('') : '<p style="color: var(--text-light);">No upcoming events in the next 7 days</p>';

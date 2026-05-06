@@ -802,6 +802,7 @@
                     <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
                     <div class="nav-item" data-section="calendar">📅 Calendar</div>
                     <div class="nav-item" data-section="resources">📁 Resources</div>
+                    <div class="nav-item" data-section="projects">📑 Projects</div>
                     <div class="nav-item" data-section="assignments">✏️ Assignments</div>
                     <div class="nav-item" data-section="progress">📈 Progress</div>
                     <div class="nav-item" data-section="messages">💬 Messages</div>
@@ -936,6 +937,37 @@
                                 </div>
                                 <div id="materialsList"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- PROJECTS -->
+                    <div class="section" id="projectsSection">
+                        <div class="card">
+                            <div class="card-title">📑 Research Projects</div>
+                            <div style="margin-bottom: 18px; padding: 16px; background: var(--light); border-radius: 8px; border-left: 4px solid var(--accent);">
+                                <strong>Current focus:</strong> Research work supervised by Prof. Nicole Mulder.
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Project Title</label>
+                                        <input type="text" id="projectTitleInput" placeholder="Enter project title">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label>Description</label>
+                                        <textarea id="projectDescriptionInput" placeholder="Describe the project" style="min-height: 90px;"></textarea>
+                                    </div>
+                                    <div id="projectUpload" style="margin-bottom: 12px; padding: 18px; background: var(--light); border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('projectFileInput').click()">
+                                        <p>📄 Click to upload a PDF project file</p>
+                                    </div>
+                                    <input type="file" id="projectFileInput" accept="application/pdf" style="display: none;" onchange="handleProjectUpload(event)">
+                                </div>
+                                <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+                                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="projectPreviewTitle">No project selected</div>
+                                    <iframe id="projectPdfViewer" title="Project PDF Preview" style="width: 100%; height: 340px; border: 0;"></iframe>
+                                </div>
+                            </div>
+                            <div id="projectsList" style="margin-top: 20px;"></div>
                         </div>
                     </div>
 
@@ -1199,6 +1231,7 @@
                 dashboard: '📊 Dashboard',
                 calendar: '📅 Calendar',
                 resources: '📁 Resources',
+                projects: '📑 Projects',
                 assignments: '✏️ Assignments',
                 progress: '📈 Progress',
                 messages: '💬 Messages'
@@ -1213,6 +1246,8 @@
                 loadProgress();
             } else if (section === 'assignments') {
                 loadAssignments();
+            } else if (section === 'projects') {
+                loadProjects();
             }
         }
 
@@ -1248,7 +1283,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const isToday = date.toDateString() === today.toDateString();
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = formatDateKey(date);
                 const dayEvents = appState.events.filter(e => e.date === dateStr);
 
                 html += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="openEventModal('${dateStr}')">
@@ -1362,7 +1397,7 @@
                     <div class="event-item-content">
                         <div class="event-item-title">${e.title}</div>
                         <div class="event-item-meta">
-                            📅 ${new Date(e.date).toLocaleDateString()} |
+                            📅 ${parseDateOnly(e.date).toLocaleDateString()} |
                             <span style="display: inline-block; padding: 2px 6px; background: var(--light); border-radius: 3px; margin: 0 4px;">
                                 ${e.type}
                             </span>
@@ -1427,7 +1462,7 @@
                 <div class="event-item" style="border-left-color: var(--warning);">
                     <div class="event-item-content">
                         <div class="event-item-title">${a.title}</div>
-                        <div class="event-item-meta">Due: ${new Date(a.dueDate).toLocaleDateString()} | Status: ${a.status}</div>
+                        <div class="event-item-meta">Due: ${parseDateOnly(a.dueDate).toLocaleDateString()} | Status: ${a.status}</div>
                         <div style="margin-top: 8px; font-size: 13px; color: var(--text);">${a.description}</div>
                     </div>
                 </div>
@@ -1496,7 +1531,7 @@
             const today = new Date();
             const upcoming = appState.events
                 .filter(e => {
-                    const eDate = new Date(e.date);
+                    const eDate = parseDateOnly(e.date);
                     return eDate >= today && eDate <= new Date(today.getTime() + upcomingDays * 24 * 60 * 60 * 1000);
                 })
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1514,7 +1549,7 @@
                 <div class="event-item">
                     <div class="event-item-content">
                         <div class="event-item-title">${e.title}</div>
-                        <div class="event-item-meta">📅 ${new Date(e.date).toLocaleDateString()} | ${e.type}</div>
+                        <div class="event-item-meta">📅 ${parseDateOnly(e.date).toLocaleDateString()} | ${e.type}</div>
                     </div>
                 </div>
             `).join('') : '<p style="color: var(--text-light);">No upcoming events in the next 7 days</p>';
@@ -1601,6 +1636,98 @@
             loadResources();
         }
 
+        function handleProjectUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const titleInput = document.getElementById('projectTitleInput');
+            const descriptionInput = document.getElementById('projectDescriptionInput');
+            const title = titleInput.value.trim() || file.name.replace(/\.pdf$/i, '');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                appState.projects = appState.projects || [];
+                appState.projects.push({
+                    title,
+                    description: descriptionInput.value.trim(),
+                    fileName: file.name,
+                    fileData: ev.target.result,
+                    uploadedAt: new Date().toLocaleDateString(),
+                    supervisor: 'Prof. Nicole Mulder'
+                });
+
+                saveAppState();
+                titleInput.value = '';
+                descriptionInput.value = '';
+                e.target.value = '';
+                loadProjects();
+                notify(`✅ ${file.name} added to projects!`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadProjects() {
+            const projects = appState.projects || [];
+            const list = document.getElementById('projectsList');
+            const viewer = document.getElementById('projectPdfViewer');
+
+            if (!list || !viewer) return;
+
+            if (!projects.length) {
+                list.innerHTML = '<p style="color: var(--text-light);">No project PDFs uploaded yet</p>';
+                viewer.src = 'about:blank';
+                document.getElementById('projectPreviewTitle').textContent = 'No project selected';
+                return;
+            }
+
+            list.innerHTML = projects.map((project, index) => `
+                <div class="event-item">
+                    <div class="event-item-content">
+                        <div class="event-item-title">📄 ${project.title}</div>
+                        <div class="event-item-meta">Supervisor: ${project.supervisor} • ${project.uploadedAt}</div>
+                        <div style="margin-top: 8px; color: var(--text);">${project.description || ''}</div>
+                    </div>
+                    <button class="btn btn-primary btn-small" onclick="viewProject(${index})">View PDF</button>
+                    ${project.fileData ? `<button class="btn btn-secondary btn-small" onclick="downloadFile('${project.fileData}', '${project.fileName}')">Download</button>` : `<button class="btn btn-secondary btn-small" onclick="window.open('${project.fileUrl}', '_blank')">Open</button>`}
+                    ${project.locked ? '' : `<button class="btn btn-danger btn-small" onclick="deleteProject(${index})">Delete</button>`}
+                </div>
+            `).join('');
+
+            viewProject(0);
+        }
+
+        function viewProject(index) {
+            const project = (appState.projects || [])[index];
+            if (!project) return;
+
+            document.getElementById('projectPdfViewer').src = project.fileData || project.fileUrl;
+            document.getElementById('projectPreviewTitle').textContent = project.title;
+        }
+
+        function deleteProject(index) {
+            if (appState.projects[index]?.locked) return;
+            appState.projects.splice(index, 1);
+            saveAppState();
+            loadProjects();
+        }
+
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function parseDateOnly(dateString) {
+            return new Date(`${dateString}T00:00:00`);
+        }
+
+        function getResearchPdfUrl() {
+            return window.location.protocol === 'file:'
+                ? 'public/research_focus.pdf'
+                : '/research_focus.pdf';
+        }
+
         // ==================== STORAGE ====================
         function saveAppState() {
             localStorage.setItem('appState', JSON.stringify(appState));
@@ -1614,6 +1741,20 @@
                 } catch (e) {
                     console.error('Error loading state');
                 }
+            }
+
+            appState.resources = appState.resources || { lectures: [], recordings: [], materials: [] };
+            appState.projects = appState.projects || [];
+            if (!appState.projects.some(project => project.locked && project.title === 'Current Research Focus')) {
+                appState.projects.unshift({
+                    title: 'Current Research Focus',
+                    description: 'Research focus supervised by Prof. Nicole Mulder',
+                    fileUrl: getResearchPdfUrl(),
+                    uploadedAt: 'Always available',
+                    supervisor: 'Prof. Nicole Mulder',
+                    locked: true
+                });
+                saveAppState();
             }
 
             const seen = new Set(appState.events.map(event => `${event.title}|${event.date}`));
