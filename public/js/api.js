@@ -283,22 +283,44 @@ function makeMockToken(username) {
 }
 
 function createMockApi() {
-  const store = {
-    users: { 'student': { password: 'password' } },
+  const STORAGE_KEY = 'msc_mock_store_v1';
+
+  const defaultStore = {
+    users: { 'simon': { password: 'simon2026', role: 'student' } },
     events: [],
     assignments: [],
-    messages: {}
+    messages: {},
+    progress: {},
+    resources: { lectures: [], recordings: [], materials: [] },
+    portfolio: {}
   };
+
+  const readStore = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? Object.assign({}, defaultStore, JSON.parse(raw)) : JSON.parse(JSON.stringify(defaultStore));
+    } catch (error) {
+      return JSON.parse(JSON.stringify(defaultStore));
+    }
+  };
+
+  const writeStore = (nextStore) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextStore));
+  };
+
+  const store = readStore();
+
+  const save = () => writeStore(store);
 
   return {
     auth: {
       async login(username, password) {
-        // accept any username; if user exists and password matches, succeed
-        const user = store.users[username] || { password: 'password' };
-        if (password === user.password) {
+        const expectedPassword = store.users[username]?.password || `${username}2026`;
+        const role = store.users[username]?.role || 'student';
+        if (password === expectedPassword) {
           const token = makeMockToken(username);
           setAuthToken(token);
-          return { token, user: { username, role: 'student' } };
+          return { token, user: { username, role } };
         }
         throw new Error('Invalid credentials (mock)');
       },
@@ -310,41 +332,93 @@ function createMockApi() {
 
     events: {
       async getAll() { return store.events.slice(); },
-      async create(e) { e.id = Date.now().toString(); store.events.push(e); return { event: e }; },
-      async update(id, e) { const i = store.events.findIndex(x=>x.id===id); if(i>=0){store.events[i]=Object.assign(store.events[i],e); return {event:store.events[i]};} throw new Error('Not found'); },
-      async delete(id){ store.events = store.events.filter(x=>x.id!==id); return { success: true }; }
+      async create(e) { e.id = Date.now().toString(); store.events.push(e); save(); return { event: e }; },
+      async update(id, e) { const i = store.events.findIndex(x=>x.id===id); if(i>=0){store.events[i]=Object.assign(store.events[i],e); save(); return {event:store.events[i]};} throw new Error('Not found'); },
+      async delete(id){ store.events = store.events.filter(x=>x.id!==id); save(); return { success: true }; }
     },
 
     assignments: {
       async getAll(){ return store.assignments.slice(); },
-      async create(a){ a.id = Date.now().toString(); store.assignments.push(a); return { assignment: a }; },
-      async update(id,a){ const i=store.assignments.findIndex(x=>x.id===id); if(i>=0){store.assignments[i]=Object.assign(store.assignments[i],a); return {assignment:store.assignments[i]};} throw new Error('Not found'); },
-      async delete(id){ store.assignments = store.assignments.filter(x=>x.id!==id); return { success: true }; }
+      async create(a){ a.id = Date.now().toString(); store.assignments.push(a); save(); return { assignment: a }; },
+      async update(id,a){ const i=store.assignments.findIndex(x=>x.id===id); if(i>=0){store.assignments[i]=Object.assign(store.assignments[i],a); save(); return {assignment:store.assignments[i]};} throw new Error('Not found'); },
+      async delete(id){ store.assignments = store.assignments.filter(x=>x.id!==id); save(); return { success: true }; }
     },
 
     messages: {
       async getWithRecipient(recipient){ return store.messages[recipient] || []; },
-      async send(recipient, content){ store.messages[recipient]=store.messages[recipient]||[]; store.messages[recipient].push({id:Date.now().toString(),content,created_at:new Date()}); return { success: true }; }
+      async send(recipient, content){ store.messages[recipient]=store.messages[recipient]||[]; store.messages[recipient].push({id:Date.now().toString(),sender:getUsername() || 'student',content,timestamp:new Date().toISOString()}); save(); return { success: true }; }
     },
 
     progress: {
-      async get(userId){ return {}; },
-      async update(userId, progress){ return { success: true }; }
+      async get(userId){ return store.progress[userId] || {}; },
+      async update(userId, progress){ store.progress[userId] = Object.assign({}, store.progress[userId] || {}, progress); save(); return { success: true }; }
     },
 
     resources: {
-      async getByType(type){ return []; },
-      async upload(r){ return { success: true }; },
-      async delete(id){ return { success: true }; }
+      async getByType(type){ return (store.resources[type] || []).slice(); },
+      async upload(r){
+        const resource = Object.assign({ id: Date.now().toString(), created_at: new Date().toISOString() }, r);
+        store.resources[typeSafe(resource.type)] = store.resources[typeSafe(resource.type)] || [];
+        store.resources[typeSafe(resource.type)].unshift(resource);
+        save();
+        return { success: true, resource };
+      },
+      async delete(id){
+        for (const type of ['lectures', 'recordings', 'materials']) {
+          const index = (store.resources[type] || []).findIndex(item => String(item.id) === String(id));
+          if (index >= 0) {
+            store.resources[type].splice(index, 1);
+            save();
+            return { success: true };
+          }
+        }
+        return { success: true };
+      }
     },
 
     portfolio: {
-      async getByAuthor(a){ return []; },
-      async create(t,c,d){ return { id:Date.now().toString(), title:t, content:c, entry_date:d }; },
-      async update(id,t,c,d){ return { id, title:t, content:c, entry_date:d }; },
-      async delete(id){ return { success: true }; }
+      async getByAuthor(author){ return (store.portfolio[author] || []).slice().sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date)); },
+      async create(title, content, entry_date){
+        const author = getUsername() || 'student';
+        const entry = { id: Date.now().toString(), author, title, content, entry_date, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        store.portfolio[author] = store.portfolio[author] || [];
+        store.portfolio[author].unshift(entry);
+        save();
+        return { entry };
+      },
+      async update(id, title, content, entry_date){
+        for (const author of Object.keys(store.portfolio)) {
+          const index = store.portfolio[author].findIndex(entry => String(entry.id) === String(id));
+          if (index >= 0) {
+            store.portfolio[author][index] = Object.assign({}, store.portfolio[author][index], {
+              title,
+              content,
+              entry_date,
+              updated_at: new Date().toISOString()
+            });
+            save();
+            return { entry: store.portfolio[author][index] };
+          }
+        }
+        throw new Error('Not found');
+      },
+      async delete(id){
+        for (const author of Object.keys(store.portfolio)) {
+          const before = store.portfolio[author].length;
+          store.portfolio[author] = store.portfolio[author].filter(entry => String(entry.id) !== String(id));
+          if (store.portfolio[author].length !== before) {
+            save();
+            return { success: true };
+          }
+        }
+        return { success: true };
+      }
     }
   };
+}
+
+function typeSafe(type) {
+  return ['lectures', 'recordings', 'materials'].includes(type) ? type : 'materials';
 }
 
 if (USE_MOCK_API) {
