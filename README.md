@@ -57,8 +57,8 @@ Go to: **http://localhost:5000**
 | Role | Password |
 |------|----------|
 | Student | `simon2026` |
-| Conveyor | `conveyor2026` |
-| Supervisor | `dalvie2026` |
+| Conveyor | `dalvie2026` |
+| Supervisor | `martin2026` |
 
 ---
 
@@ -151,6 +151,7 @@ Browser 4 (Super)    ─┘    ✅ Progress updates sync
 
 ### 👩‍💼 Supervisor
 - View all calendar events
+- Create calendar events, assignments, and resources
 - Send messages
 - Add feedback to Student's progress
 - Monitor Student progress

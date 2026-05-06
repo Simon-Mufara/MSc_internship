@@ -94,8 +94,8 @@ function initDatabase() {
 function initializeDefaultUsers() {
   const users = [
     { username: 'simon', role: 'student', password: 'simon2026' },
-    { username: 'conveyor', role: 'conveyor', password: 'conveyor2026' },
-    { username: 'dalvie', role: 'supervisor', password: 'dalvie2026' }
+    { username: 'conveyor', role: 'conveyor', password: 'dalvie2026' },
+    { username: 'dalvie', role: 'supervisor', password: 'martin2026' }
   ];
 
   users.forEach(user => {
@@ -106,6 +106,61 @@ function initializeDefaultUsers() {
       (err) => {
         if (err) console.error(`Error creating user ${user.username}:`, err.message);
         else console.log(`✅ User ${user.username} ready`);
+      }
+    );
+  });
+
+  const examEvents = [
+    {
+      title: 'IBS6024F - Biocomputing',
+      type: 'assessment',
+      date: '2026-06-01',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilator: Hocine Bendou'
+    },
+    {
+      title: 'IBS6025F - Bioinformatic Programming with Python',
+      type: 'assessment',
+      date: '2026-06-03',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer and paper-based | Invigilators: Hocine Bendou, Shareefa Dalvie'
+    },
+    {
+      title: 'IBS6026F - Machine Learning and Biomedical Data Science',
+      type: 'assessment',
+      date: '2026-06-05',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Computer-based | Invigilator: Musalula Sinkala'
+    },
+    {
+      title: 'PTY6028F - Omics Data Generation',
+      type: 'assessment',
+      date: '2026-06-08',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+    },
+    {
+      title: 'PTY6027F - Omics Data Mining',
+      type: 'assessment',
+      date: '2026-06-10',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+    },
+    {
+      title: 'PTY6029F - Population Genomics',
+      type: 'assessment',
+      date: '2026-06-12',
+      description: 'Time: 9:00am-12:00pm | Venue: Postgrad Room 1 | Type: Paper-based | Invigilator: Shareefa Dalvie'
+    }
+  ];
+
+  db.run(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_events_title_date
+    ON events(title, date)
+  `);
+
+  examEvents.forEach(event => {
+    db.run(
+      `INSERT OR IGNORE INTO events (title, type, date, description, created_by, reminder)
+       VALUES (?, ?, ?, ?, ?, ?)` ,
+      [event.title, event.type, event.date, event.description, 'dalvie', 0],
+      (err) => {
+        if (err) console.error(`Error creating exam event ${event.title}:`, err.message);
       }
     );
   });

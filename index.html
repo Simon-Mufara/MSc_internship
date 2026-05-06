@@ -1063,8 +1063,8 @@
         // ==================== STATE ====================
         const PASSWORDS = {
             student: 'simon2026',
-            conveyor: 'conveyor2026',
-            supervisor: 'dalvie2026'
+            conveyor: 'dalvie2026',
+            supervisor: 'martin2026'
         };
 
         let currentUser = null;
@@ -1154,11 +1154,11 @@
             document.getElementById('userDisplay').textContent = `Logged in as ${roles[currentUser]}`;
 
             // Show/hide role-specific features
-            const isConveyor = currentUser === 'conveyor';
-            document.getElementById('lectureUpload').style.display = isConveyor ? 'block' : 'none';
-            document.getElementById('recordingUpload').style.display = isConveyor ? 'block' : 'none';
-            document.getElementById('materialUpload').style.display = isConveyor ? 'block' : 'none';
-            document.getElementById('assignmentCreateForm').style.display = isConveyor ? 'block' : 'none';
+            const canAddContent = currentUser === 'conveyor' || currentUser === 'supervisor';
+            document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
+            document.getElementById('recordingUpload').style.display = canAddContent ? 'block' : 'none';
+            document.getElementById('materialUpload').style.display = canAddContent ? 'block' : 'none';
+            document.getElementById('assignmentCreateForm').style.display = canAddContent ? 'block' : 'none';
 
             const isSupervisor = currentUser === 'supervisor';
             document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
@@ -1284,7 +1284,7 @@
 
         // ==================== EVENTS ====================
         function openEventModal(dateStr = null) {
-            if (currentUser !== 'student' && currentUser !== 'conveyor') return;
+            if (!['student', 'conveyor', 'supervisor'].includes(currentUser)) return;
 
             currentEditingEvent = null;
             document.getElementById('modalTitle').textContent = 'Add Event';

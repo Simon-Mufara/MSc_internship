@@ -56,8 +56,8 @@ app.listen(PORT, () => {
 ║                                                                ║
 ║  🔐 Test Credentials:                                          ║
 ║     Username: simon, Role: Student, Password: simon2026        ║
-║     Username: conveyor, Role: Conveyor, Password: conveyor2026 ║
-║     Username: dalvie, Role: Supervisor, Password: dalvie2026   ║
+║     Username: conveyor, Role: Conveyor, Password: dalvie2026   ║
+║     Username: dalvie, Role: Supervisor, Password: martin2026   ║
 ║                                                                ║
 ║  💡 For multi-user testing:                                    ║
 ║     Open 2 browsers or 2 browser windows                       ║

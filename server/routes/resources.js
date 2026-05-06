@@ -29,7 +29,7 @@ router.get('/:type', auth, async (req, res) => {
 
 router.post('/',
   auth,
-  authorize('conveyor'),
+  authorize('conveyor', 'supervisor'),
   body('name').trim().notEmpty().withMessage('Name required'),
   body('type').isIn(['lectures', 'recordings', 'materials']).withMessage('Invalid type'),
   body('size').isFloat({ min: 0 }).withMessage('Invalid size'),

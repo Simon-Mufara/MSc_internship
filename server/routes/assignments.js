@@ -22,7 +22,7 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/',
   auth,
-  authorize('conveyor'),
+  authorize('conveyor', 'supervisor'),
   body('title').trim().notEmpty().withMessage('Title required'),
   body('dueDate').isISO8601().withMessage('Invalid date'),
   async (req, res) => {

@@ -102,11 +102,11 @@ function updateUI() {
   document.getElementById('userBadge').textContent = roleNames[currentUserRole] || currentUser;
   document.getElementById('userDisplay').textContent = `Logged in as ${currentUserRole}`;
 
-  const isConveyor = currentUserRole === 'conveyor';
-  document.getElementById('lectureUpload').style.display = isConveyor ? 'block' : 'none';
-  document.getElementById('recordingUpload').style.display = isConveyor ? 'block' : 'none';
-  document.getElementById('materialUpload').style.display = isConveyor ? 'block' : 'none';
-  document.getElementById('assignmentCreateForm').style.display = isConveyor ? 'block' : 'none';
+  const canAddContent = currentUserRole === 'conveyor' || currentUserRole === 'supervisor';
+  document.getElementById('lectureUpload').style.display = canAddContent ? 'block' : 'none';
+  document.getElementById('recordingUpload').style.display = canAddContent ? 'block' : 'none';
+  document.getElementById('materialUpload').style.display = canAddContent ? 'block' : 'none';
+  document.getElementById('assignmentCreateForm').style.display = canAddContent ? 'block' : 'none';
 
   const isSupervisor = currentUserRole === 'supervisor';
   document.getElementById('supervisorFeedback').style.display = isSupervisor ? 'block' : 'none';
@@ -235,7 +235,7 @@ function todayMonth() {
 
 // EVENTS
 async function openEventModal(dateStr = null) {
-  if (currentUserRole !== 'student' && currentUserRole !== 'conveyor') return;
+  if (!['student', 'conveyor', 'supervisor'].includes(currentUserRole)) return;
 
   currentEditingEvent = null;
   document.getElementById('modalTitle').textContent = 'Add Event';
