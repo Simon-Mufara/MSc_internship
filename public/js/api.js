@@ -408,6 +408,21 @@ function createMockApi() {
         store.messages.push(message);
         save();
         return { success: true, message };
+      },
+      async delete(messageId) {
+        const currentUsername = getUsername();
+        const before = (store.messages || []).length;
+        store.messages = (store.messages || []).filter(message => (
+          String(message.id) !== String(messageId) ||
+          (message.sender !== currentUsername && message.recipient !== currentUsername)
+        ));
+
+        if ((store.messages || []).length === before) {
+          return { success: true };
+        }
+
+        save();
+        return { success: true };
       }
     },
 
