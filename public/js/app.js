@@ -1001,7 +1001,7 @@ function renderProjectsPanel() {
       <div style="padding: 16px; background: var(--light); border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 18px;">
         <strong>Comment-only mode:</strong> Martin and Dalvie can review and comment on Simon's research, but cannot upload or submit projects.
       </div>
-      <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; margin-bottom: 18px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 18px;">
         <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
           <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="mentorProjectPreviewTitle">Research Paper</div>
           <iframe id="mentorProjectPdfViewer" title="Research Paper Preview" style="width: 100%; height: 340px; border: 0;"></iframe>

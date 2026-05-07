@@ -697,6 +697,11 @@ html, body {
     flex-direction: column;
   }
 
+  .app-wrapper {
+    height: auto;
+    min-height: 100vh;
+  }
+
   .sidebar {
     width: 100%;
     display: flex;
@@ -730,6 +735,11 @@ html, body {
   .calendar-grid {
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
+    min-width: 700px;
+  }
+
+  .calendar-wrapper {
+    overflow-x: auto;
   }
 
   .calendar-day {
@@ -753,10 +763,98 @@ html, body {
     flex-direction: column;
     gap: 10px;
     text-align: center;
+    padding: 14px 16px;
+  }
+
+  .topbar-info {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 14px;
   }
 
   .content {
     padding: 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-item {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    white-space: nowrap;
+    padding: 12px 14px;
+  }
+
+  #messagesSection > div {
+    grid-template-columns: 1fr !important;
+  }
+
+  #projectsSection .card > div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  #projectsSection iframe,
+  #portfolioSection iframe {
+    min-height: 62vh !important;
+    height: 62vh !important;
+  }
+
+  .modal-content {
+    width: calc(100% - 20px);
+    max-height: 92vh;
+    padding: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn,
+  .btn-small,
+  .login-submit,
+  .logout-btn {
+    min-height: 42px;
+  }
+
+  .notification {
+    right: 10px;
+    left: 10px;
+    top: 10px;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 28px 20px;
+    margin: 12px;
+  }
+
+  .topbar h2 {
+    font-size: 20px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .card-title {
+    font-size: 16px;
+  }
+
+  .content {
+    padding: 10px;
   }
 }
 
