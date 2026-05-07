@@ -831,7 +831,14 @@ async function deleteMessage(messageId, slot) {
   if (!confirm('Delete this message?')) return;
 
   try {
-    await api.messages.delete(messageId);
+    if (api.messages && typeof api.messages.delete === 'function') {
+      await api.messages.delete(messageId);
+    } else {
+      await fetch(`${API_BASE}/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      }).then(handleResponse);
+    }
     await loadMessages(slot);
     await updateDashboard();
     notify('Message deleted');
@@ -994,7 +1001,13 @@ function renderProjectsPanel() {
       <div style="padding: 16px; background: var(--light); border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 18px;">
         <strong>Comment-only mode:</strong> Martin and Dalvie can review and comment on Simon's research, but cannot upload or submit projects.
       </div>
-      <div id="mentorProjectPreview" style="margin-bottom: 18px;"></div>
+      <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; margin-bottom: 18px;">
+        <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+          <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="mentorProjectPreviewTitle">Research Paper</div>
+          <iframe id="mentorProjectPdfViewer" title="Research Paper Preview" style="width: 100%; height: 340px; border: 0;"></iframe>
+        </div>
+        <div id="mentorProjectPreview" style="align-self: stretch;"></div>
+      </div>
       <div class="card" style="margin-bottom: 18px; background: var(--bg-card);">
         <div class="card-title">💬 Add Research Comment</div>
         <textarea id="mentorCommentInput" placeholder="Comment on the current research..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; background: var(--bg-deep); color: var(--text-primary);"></textarea>
@@ -1038,6 +1051,8 @@ function renderProjectsPanel() {
 
   if (mentorMode) {
     const preview = document.getElementById('mentorProjectPreview');
+    const viewer = document.getElementById('mentorProjectPdfViewer');
+    const title = document.getElementById('mentorProjectPreviewTitle');
     if (preview) {
       preview.innerHTML = primaryProject ? `
         <div class="event-item">
@@ -1048,6 +1063,13 @@ function renderProjectsPanel() {
           </div>
         </div>
       ` : '<p style="color: var(--text-light);">No research project available yet.</p>';
+    }
+
+    if (viewer && primaryProject) {
+      viewer.src = primaryProject.fileData || primaryProject.fileUrl || './research_focus.pdf';
+    }
+    if (title && primaryProject) {
+      title.textContent = primaryProject.title || 'Research Paper';
     }
   }
 }
