@@ -390,6 +390,8 @@ function updateUI() {
     document.getElementById('pty6027').disabled = true;
     document.getElementById('pty6028').disabled = true;
   }
+
+  refreshMessageHeaders();
 }
 
 function setupNavigation() {
@@ -438,6 +440,7 @@ async function switchSection(section) {
     await renderProjects();
     if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'messages') {
+    refreshMessageHeaders();
     await loadMessages('conveyor');
     await loadMessages('supervisor');
     // start polling messages for real-time-ish sync
@@ -706,22 +709,54 @@ async function loadProgress() {
 }
 
 // MESSAGES
-async function sendMessage(recipient) {
-  const input = document.getElementById(recipient + 'Msg');
+function getMessageRecipient(slot) {
+  const recipientMap = {
+    student: { conveyor: 'dalvie', supervisor: 'martin' },
+    conveyor: { conveyor: 'simon', supervisor: 'martin' },
+    supervisor: { conveyor: 'simon', supervisor: 'dalvie' }
+  };
+
+  return recipientMap[currentUserRole]?.[slot] || slot;
+}
+
+function getMessageTitle(slot) {
+  const recipient = getMessageRecipient(slot);
+  const labels = {
+    simon: 'Student',
+    dalvie: 'Conveyor',
+    martin: 'Supervisor'
+  };
+
+  return `💬 Messages with ${labels[recipient] || recipient}`;
+}
+
+function refreshMessageHeaders() {
+  const headers = document.querySelectorAll('#messagesSection .card-title');
+  if (headers.length >= 2) {
+    headers[0].textContent = getMessageTitle('conveyor');
+    headers[1].textContent = getMessageTitle('supervisor');
+  }
+}
+
+async function sendMessage(slot) {
+  const input = document.getElementById(slot + 'Msg');
   const msg = input.value.trim();
   if (!msg) return;
+
+  const recipient = getMessageRecipient(slot);
 
   try {
     await api.messages.send(recipient, msg);
     input.value = '';
-    await loadMessages(recipient);
+    await loadMessages(slot);
     notify('📨 Message sent!');
   } catch (error) {
     notify('Error sending message: ' + error.message, 'error');
   }
 }
 
-async function loadMessages(recipient) {
+async function loadMessages(slot) {
+  const recipient = getMessageRecipient(slot);
   try {
     const msgs = await api.messages.getWithRecipient(recipient);
     let html = msgs.map(m => `
@@ -734,7 +769,7 @@ async function loadMessages(recipient) {
       </div>
     `).join('');
 
-    document.getElementById(recipient + 'Messages').innerHTML = html || '<p style="color: var(--text-light);">No messages</p>';
+    document.getElementById(slot + 'Messages').innerHTML = html || '<p style="color: var(--text-light);">No messages</p>';
   } catch (error) {
     console.error('Error loading messages:', error);
   }
@@ -957,9 +992,15 @@ async function updateDashboard() {
 
     let totalMessages = 0;
     try {
-      const convMsgs = await api.messages.getWithRecipient('conveyor');
-      const supMsgs = await api.messages.getWithRecipient('supervisor');
-      totalMessages = convMsgs.length + supMsgs.length;
+      const recipients = [...new Set([
+        getMessageRecipient('conveyor'),
+        getMessageRecipient('supervisor')
+      ])];
+
+      for (const recipient of recipients) {
+        const thread = await api.messages.getWithRecipient(recipient);
+        totalMessages += thread.length;
+      }
     } catch (e) {}
     document.getElementById('stat-messages').textContent = totalMessages;
   } catch (error) {
@@ -976,10 +1017,10 @@ async function loadPortfolio() {
     <div class="card">
       <div class="card-title">📓 Research Command Centre</div>
       <div style="margin-bottom: 14px; padding: 12px; background: var(--light); border-radius: 6px; font-size: 12px; color: var(--text-light); line-height: 1.6;">
-        Embedded research dashboard page. It includes the custom command centre layout, tabs, and weekly planning board you provided.
+        Embedded research dashboard page from your latest HTML file.
       </div>
       <iframe
-        src="research_command_centre.html"
+        src="simon_research_dashboard.html"
         title="Research Command Centre"
         style="width: 100%; min-height: 1100px; border: 1px solid var(--border); border-radius: 10px; background: #fff; display: block;"
         onload="this.style.height=(this.contentDocument.body.scrollHeight + 40) + 'px';"

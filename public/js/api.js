@@ -297,7 +297,7 @@ function createMockApi() {
     },
     events: [],
     assignments: [],
-    messages: {},
+    messages: [],
     progress: {},
     resources: { lectures: [], recordings: [], materials: [] },
     portfolio: {}
@@ -306,7 +306,31 @@ function createMockApi() {
   const readStore = () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? Object.assign({}, defaultStore, JSON.parse(raw)) : JSON.parse(JSON.stringify(defaultStore));
+      const merged = raw ? Object.assign({}, defaultStore, JSON.parse(raw)) : JSON.parse(JSON.stringify(defaultStore));
+
+      // Migrate legacy message format ({ recipient: [msgs] }) to normalized array format.
+      if (!Array.isArray(merged.messages) && merged.messages && typeof merged.messages === 'object') {
+        const migrated = [];
+        Object.entries(merged.messages).forEach(([recipient, messageList]) => {
+          if (!Array.isArray(messageList)) return;
+          messageList.forEach((message, index) => {
+            migrated.push({
+              id: message.id || `${Date.now()}-${index}`,
+              sender: message.sender || 'unknown',
+              recipient: message.recipient || recipient,
+              content: message.content || '',
+              timestamp: message.timestamp || new Date().toISOString()
+            });
+          });
+        });
+        merged.messages = migrated;
+      }
+
+      if (!Array.isArray(merged.messages)) {
+        merged.messages = [];
+      }
+
+      return merged;
     } catch (error) {
       return JSON.parse(JSON.stringify(defaultStore));
     }
@@ -354,8 +378,29 @@ function createMockApi() {
     },
 
     messages: {
-      async getWithRecipient(recipient){ return store.messages[recipient] || []; },
-      async send(recipient, content){ store.messages[recipient]=store.messages[recipient]||[]; store.messages[recipient].push({id:Date.now().toString(),sender:getUsername() || 'student',content,timestamp:new Date().toISOString()}); save(); return { success: true }; }
+      async getWithRecipient(recipient) {
+        const currentUsername = getUsername();
+        return (store.messages || [])
+          .filter(message => (
+            (message.sender === currentUsername && message.recipient === recipient) ||
+            (message.sender === recipient && message.recipient === currentUsername)
+          ))
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      },
+      async send(recipient, content) {
+        const message = {
+          id: Date.now().toString(),
+          sender: getUsername() || 'student',
+          recipient,
+          content,
+          timestamp: new Date().toISOString()
+        };
+
+        store.messages = store.messages || [];
+        store.messages.push(message);
+        save();
+        return { success: true, message };
+      }
     },
 
     progress: {
