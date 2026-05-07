@@ -14,7 +14,9 @@ let socket = null;
 
 let localLibrary = {
   resources: { lectures: [], recordings: [], materials: [] },
-  projects: []
+  projects: [],
+  projectComments: [],
+  progressModules: []
 };
 
 const examTimetable = [
@@ -262,6 +264,8 @@ function loadLocalLibrary() {
     const parsed = JSON.parse(saved);
     localLibrary.resources = parsed.resources || localLibrary.resources;
     localLibrary.projects = parsed.projects || [];
+    localLibrary.projectComments = parsed.projectComments || [];
+    localLibrary.progressModules = parsed.progressModules || [];
   } catch (error) {
     console.error('Error loading local library:', error);
   }
@@ -271,6 +275,37 @@ function loadLocalLibrary() {
 
 function saveLocalLibrary() {
   localStorage.setItem('localLibrary', JSON.stringify(localLibrary));
+}
+
+function getPrimaryResearchProject() {
+  return localLibrary.projects.find(project => project.locked) || localLibrary.projects[0] || null;
+}
+
+function getProjectComments(projectId) {
+  return (localLibrary.projectComments || [])
+    .filter(comment => String(comment.projectId) === String(projectId))
+    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+}
+
+function addProjectComment(projectId, content) {
+  localLibrary.projectComments = localLibrary.projectComments || [];
+  localLibrary.projectComments.push({
+    id: Date.now().toString(),
+    projectId,
+    author: currentUser || 'unknown',
+    content,
+    timestamp: new Date().toISOString()
+  });
+  saveLocalLibrary();
+}
+
+function getProgressModules() {
+  return Array.isArray(localLibrary.progressModules) ? localLibrary.progressModules : [];
+}
+
+function setProgressModules(modules) {
+  localLibrary.progressModules = modules;
+  saveLocalLibrary();
 }
 
 function getResearchPdfUrl() {
@@ -392,6 +427,7 @@ function updateUI() {
   }
 
   refreshMessageHeaders();
+  renderDashboardActions();
 }
 
 function setupNavigation() {
@@ -437,6 +473,7 @@ async function switchSection(section) {
     await loadResources();
     if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'projects') {
+    renderProjectsPanel();
     await renderProjects();
     if (messagePollId) { clearInterval(messagePollId); messagePollId = null; }
   } else if (section === 'messages') {
@@ -682,12 +719,22 @@ async function loadAssignments() {
 // PROGRESS
 async function saveProgress() {
   try {
+    const moduleRows = document.querySelectorAll('[data-module-row]');
+    const modules = [...moduleRows].map(row => ({
+      id: row.dataset.moduleId,
+      name: row.querySelector('[data-module-name]')?.value.trim(),
+      progress: parseInt(row.querySelector('[data-module-progress]')?.value || '0', 10)
+    })).filter(module => module.name);
+
     const progress = {
       monthlyUpdate: document.getElementById('monthlyUpdate').value,
       pty6027: document.getElementById('pty6027').value,
       pty6028: document.getElementById('pty6028').value,
-      supervisorFeedback: document.getElementById('feedbackArea').value
+      supervisorFeedback: document.getElementById('feedbackArea').value,
+      modules
     };
+
+    setProgressModules(modules);
     await api.progress.update(currentUser, progress);
     await updateDashboard();
     notify('✅ Progress saved!');
@@ -703,6 +750,8 @@ async function loadProgress() {
     document.getElementById('pty6027').value = p.pty6027 || 0;
     document.getElementById('pty6028').value = p.pty6028 || 0;
     document.getElementById('feedbackArea').value = p.supervisorFeedback || '';
+    setProgressModules(p.modules || getProgressModules());
+    renderProgressModules();
   } catch (error) {
     console.error('Error loading progress:', error);
   }
@@ -762,7 +811,10 @@ async function loadMessages(slot) {
     let html = msgs.map(m => `
       <div class="event-item">
         <div class="event-item-content">
-          <div class="event-item-title">${m.sender}</div>
+          <div class="event-item-title" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+            <span>${m.sender}</span>
+            <button class="btn btn-secondary btn-small" onclick="deleteMessage('${m.id}', '${slot}')">Delete</button>
+          </div>
           <div class="event-item-meta">${new Date(m.timestamp).toLocaleString()}</div>
           <div style="margin-top: 8px; color: var(--text);">${m.content}</div>
         </div>
@@ -772,6 +824,19 @@ async function loadMessages(slot) {
     document.getElementById(slot + 'Messages').innerHTML = html || '<p style="color: var(--text-light);">No messages</p>';
   } catch (error) {
     console.error('Error loading messages:', error);
+  }
+}
+
+async function deleteMessage(messageId, slot) {
+  if (!confirm('Delete this message?')) return;
+
+  try {
+    await api.messages.delete(messageId);
+    await loadMessages(slot);
+    await updateDashboard();
+    notify('Message deleted');
+  } catch (error) {
+    notify('Error deleting message: ' + error.message, 'error');
   }
 }
 
@@ -916,6 +981,234 @@ function handleProjectUpload(event) {
   reader.readAsDataURL(file);
 }
 
+function renderProjectsPanel() {
+  const section = document.getElementById('projectsSection');
+  if (!section) return;
+
+  const primaryProject = getPrimaryResearchProject();
+  const mentorMode = currentUserRole !== 'student';
+
+  section.innerHTML = mentorMode ? `
+    <div class="card">
+      <div class="card-title">📑 Research Notes</div>
+      <div style="padding: 16px; background: var(--light); border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 18px;">
+        <strong>Comment-only mode:</strong> Martin and Dalvie can review and comment on Simon's research, but cannot upload or submit projects.
+      </div>
+      <div id="mentorProjectPreview" style="margin-bottom: 18px;"></div>
+      <div class="card" style="margin-bottom: 18px; background: var(--bg-card);">
+        <div class="card-title">💬 Add Research Comment</div>
+        <textarea id="mentorCommentInput" placeholder="Comment on the current research..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; background: var(--bg-deep); color: var(--text-primary);"></textarea>
+        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="saveProjectComment()">Post Comment</button>
+          <button class="btn btn-secondary" onclick="scrollToProjectComments()">View Comments</button>
+        </div>
+      </div>
+      <div id="projectCommentsList"></div>
+    </div>
+  ` : `
+    <div class="card">
+      <div class="card-title">📑 Research Projects</div>
+      <div style="margin-bottom: 18px; padding: 16px; background: var(--light); border-radius: 8px; border-left: 4px solid var(--accent);">
+        <strong>Current focus:</strong> Research work supervised by Prof. Nicole Mulder.
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Project Title</label>
+            <input type="text" id="projectTitleInput" placeholder="Enter project title">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Description</label>
+            <textarea id="projectDescriptionInput" placeholder="Describe the project" style="min-height: 90px;"></textarea>
+          </div>
+          <div id="projectUpload" style="margin-bottom: 12px; padding: 18px; background: var(--light); border: 2px dashed var(--accent); border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('projectFileInput').click()">
+            <p>📄 Click to upload a PDF project file</p>
+          </div>
+          <input type="file" id="projectFileInput" accept="application/pdf" style="display: none;" onchange="handleProjectUpload(event)">
+        </div>
+        <div style="min-height: 320px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+          <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600;" id="projectPreviewTitle">No project selected</div>
+          <iframe id="projectPdfViewer" title="Project PDF Preview" style="width: 100%; height: 340px; border: 0;"></iframe>
+        </div>
+      </div>
+      <div id="projectCommentsList" style="margin-top: 18px;"></div>
+      <div id="projectsList" style="margin-top: 20px;"></div>
+    </div>
+  `;
+
+  if (mentorMode) {
+    const preview = document.getElementById('mentorProjectPreview');
+    if (preview) {
+      preview.innerHTML = primaryProject ? `
+        <div class="event-item">
+          <div class="event-item-content">
+            <div class="event-item-title">${primaryProject.title}</div>
+            <div class="event-item-meta">Supervisor: ${primaryProject.supervisor} • ${primaryProject.uploadedAt}</div>
+            <div style="margin-top: 8px; color: var(--text);">${primaryProject.description || ''}</div>
+          </div>
+        </div>
+      ` : '<p style="color: var(--text-light);">No research project available yet.</p>';
+    }
+  }
+
+  renderProjectComments();
+}
+
+function renderProjectComments() {
+  const list = document.getElementById('projectCommentsList');
+  if (!list) return;
+
+  const primaryProject = getPrimaryResearchProject();
+  const projectId = primaryProject?.id || 'primary-research';
+  const comments = getProjectComments(projectId);
+  list.innerHTML = `
+    <div class="card">
+      <div class="card-title">💬 Research Comments</div>
+      ${comments.length ? comments.map(comment => `
+        <div class="event-item">
+          <div class="event-item-content">
+            <div class="event-item-title">${comment.author}</div>
+            <div class="event-item-meta">${new Date(comment.timestamp).toLocaleString()}</div>
+            <div style="margin-top: 8px; color: var(--text);">${comment.content}</div>
+          </div>
+        </div>
+      `).join('') : '<p style="color: var(--text-light);">No comments yet.</p>'}
+    </div>
+  `;
+}
+
+function saveProjectComment() {
+  const primaryProject = getPrimaryResearchProject();
+  if (!primaryProject) {
+    notify('No research project to comment on yet', 'error');
+    return;
+  }
+
+  const input = document.getElementById('mentorCommentInput');
+  const content = input?.value.trim();
+  if (!content) return;
+
+  addProjectComment(primaryProject.id || 'primary-research', content);
+  if (input) input.value = '';
+  renderProjectComments();
+  notify('Comment saved');
+}
+
+function scrollToProjectComments() {
+  const comments = document.getElementById('projectCommentsList');
+  if (comments) comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderProgressModules() {
+  let container = document.getElementById('progressModulesPanel');
+  if (!container) {
+    const progressCard = document.querySelector('#progressSection .card');
+    if (!progressCard) return;
+
+    container = document.createElement('div');
+    container.id = 'progressModulesPanel';
+    progressCard.appendChild(container);
+  }
+
+  const modules = getProgressModules();
+  container.innerHTML = `
+    <div style="margin-top: 20px; padding: 20px; background: var(--light); border-radius: 8px; border: 1px solid var(--border);">
+      <div class="card-title" style="margin-bottom: 10px;">🧩 Additional Modules</div>
+      <div id="moduleList" style="display: grid; gap: 10px; margin-bottom: 14px;"></div>
+      <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end;">
+        <div class="form-group" style="margin: 0;">
+          <label>Module Name</label>
+          <input type="text" id="moduleNameInput" placeholder="Add another module">
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label>Progress %</label>
+          <input type="number" id="moduleProgressInput" min="0" max="100" value="0">
+        </div>
+        <button class="btn btn-primary" onclick="addProgressModule()">Add Module</button>
+      </div>
+    </div>
+  `;
+
+  const list = document.getElementById('moduleList');
+  if (list) {
+    list.innerHTML = modules.length ? modules.map((module, index) => `
+      <div data-module-row data-module-id="${module.id || index}" style="display:flex; gap:10px; align-items:center; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; flex-wrap: wrap;">
+        <input data-module-name data-module-id="${module.id || index}" value="${module.name || ''}" style="flex: 1; min-width: 180px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-void); color: var(--text-primary);">
+        <input data-module-progress data-module-id="${module.id || index}" type="number" min="0" max="100" value="${module.progress || 0}" style="width: 96px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-void); color: var(--text-primary);">
+        <button class="btn btn-secondary btn-small" onclick="removeProgressModule('${module.id || index}')">Remove</button>
+      </div>
+    `).join('') : '<p style="color: var(--text-light);">No additional modules added yet.</p>';
+  }
+}
+
+function addProgressModule() {
+  const nameInput = document.getElementById('moduleNameInput');
+  const progressInput = document.getElementById('moduleProgressInput');
+  const name = nameInput?.value.trim();
+  const progress = parseInt(progressInput?.value || '0', 10);
+
+  if (!name) return;
+
+  const modules = getProgressModules();
+  modules.push({ id: Date.now().toString(), name, progress: Number.isFinite(progress) ? progress : 0 });
+  setProgressModules(modules);
+  if (nameInput) nameInput.value = '';
+  if (progressInput) progressInput.value = '0';
+  renderProgressModules();
+  saveProgress();
+}
+
+function removeProgressModule(moduleId) {
+  const modules = getProgressModules().filter(module => String(module.id) !== String(moduleId));
+  setProgressModules(modules);
+  renderProgressModules();
+  saveProgress();
+}
+
+function renderDashboardActions() {
+  const section = document.getElementById('dashboardSection');
+  if (!section || document.getElementById('dashboardActionsPanel')) return;
+
+  const actions = document.createElement('div');
+  actions.id = 'dashboardActionsPanel';
+  actions.style.marginTop = '20px';
+  actions.innerHTML = `
+    <div class="card" style="background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(245,158,11,0.08)); border: 1px solid var(--border-bright);">
+      <div class="card-title">⚡ Quick Actions</div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        <button class="btn btn-primary" onclick="switchSection('messages')">Open Messages</button>
+        <button class="btn btn-secondary" onclick="switchSection('projects')">Review Research</button>
+        <button class="btn btn-secondary" onclick="switchSection('progress')">Update Progress</button>
+        <button class="btn btn-secondary" onclick="switchSection('calendar')">View Schedule</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px; background: rgba(17,28,42,0.95); border: 1px solid var(--border);">
+      <div class="card-title">✨ Today’s Focus</div>
+      <div id="dashboardFocusText" style="color: var(--text-secondary); line-height: 1.65;"></div>
+    </div>
+  `;
+
+  const firstCard = section.querySelector('.card');
+  if (firstCard) {
+    firstCard.insertAdjacentElement('afterend', actions);
+    updateDashboardFocus();
+  }
+}
+
+function updateDashboardFocus() {
+  const focus = document.getElementById('dashboardFocusText');
+  if (!focus) return;
+
+  const messagesHint = currentUserRole === 'student'
+    ? 'Check messages, submit your progress update, and review mentor comments before you upload your next deliverable.'
+    : 'Review Simon\'s research notes, comment clearly, and keep the discussion focused on the next decision point.';
+
+  focus.innerHTML = `
+    <p>${messagesHint}</p>
+    <p style="margin-top:10px;"><strong>Current research memory:</strong> ${getPrimaryResearchProject()?.title || 'Current Research Focus'}</p>
+  `;
+}
+
 async function renderProjects() {
   const list = document.getElementById('projectsList');
   const viewer = document.getElementById('projectPdfViewer');
@@ -989,6 +1282,8 @@ async function updateDashboard() {
         </div>
       </div>
     `).join('') : '<p style="color: var(--text-light);">No upcoming events in the next 7 days</p>';
+
+    updateDashboardFocus();
 
     let totalMessages = 0;
     try {

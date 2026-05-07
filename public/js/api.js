@@ -160,6 +160,14 @@ let api = {
         body: JSON.stringify({ recipient, content })
       });
       return handleResponse(response);
+    },
+
+    async delete(messageId) {
+      const response = await fetch(`${API_BASE}/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      return handleResponse(response);
     }
   },
 

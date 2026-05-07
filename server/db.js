@@ -70,6 +70,7 @@ function initDatabase() {
         pty6027 INTEGER,
         pty6028 INTEGER,
         supervisor_feedback TEXT,
+        modules_json TEXT DEFAULT '[]',
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(username)
       )
@@ -101,7 +102,24 @@ function initDatabase() {
         FOREIGN KEY (author) REFERENCES users(username)
       )
     `, () => {
+      ensureProgressModulesColumn();
       initializeDefaultUsers();
+    });
+  });
+}
+
+function ensureProgressModulesColumn() {
+  db.all('PRAGMA table_info(progress)', (err, columns) => {
+    if (err) {
+      console.error('Error checking progress schema:', err.message);
+      return;
+    }
+
+    const hasModulesColumn = (columns || []).some(column => column.name === 'modules_json');
+    if (hasModulesColumn) return;
+
+    db.run("ALTER TABLE progress ADD COLUMN modules_json TEXT DEFAULT '[]'", (alterErr) => {
+      if (alterErr) console.error('Error adding modules_json column:', alterErr.message);
     });
   });
 }

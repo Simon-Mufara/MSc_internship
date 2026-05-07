@@ -71,4 +71,32 @@ router.post('/',
   }
 );
 
+router.delete('/:messageId', auth, async (req, res) => {
+  try {
+    const messageId = req.params.messageId;
+    const currentUser = req.user.username;
+
+    const message = await allAsync(`
+      SELECT id, sender, recipient
+      FROM messages
+      WHERE id = ?
+    `, [messageId]);
+
+    const target = message[0];
+    if (!target) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    if (target.sender !== currentUser && target.recipient !== currentUser) {
+      return res.status(403).json({ message: 'Not authorized to delete this message' });
+    }
+
+    await runAsync('DELETE FROM messages WHERE id = ?', [messageId]);
+    res.json({ message: 'Message deleted' });
+  } catch (err) {
+    console.error('Error deleting message:', err);
+    res.status(500).json({ message: 'Error deleting message', error: err.message });
+  }
+});
+
 module.exports = router;

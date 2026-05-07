@@ -10,7 +10,7 @@ router.get('/:userId', auth, async (req, res) => {
     const userId = req.params.userId;
 
     const progress = await getAsync(`
-      SELECT id, user_id, monthly_update, pty6027, pty6028, supervisor_feedback, updated_at
+      SELECT id, user_id, monthly_update, pty6027, pty6028, supervisor_feedback, modules_json, updated_at
       FROM progress
       WHERE user_id = ?
     `, [userId]);
@@ -22,9 +22,17 @@ router.get('/:userId', auth, async (req, res) => {
           monthlyUpdate: '',
           pty6027: 0,
           pty6028: 0,
-          supervisorFeedback: ''
+          supervisorFeedback: '',
+          modules: []
         }
       });
+    }
+
+    let modules = [];
+    try {
+      modules = progress.modules_json ? JSON.parse(progress.modules_json) : [];
+    } catch (parseError) {
+      modules = [];
     }
 
     res.json({
@@ -34,6 +42,7 @@ router.get('/:userId', auth, async (req, res) => {
         pty6027: progress.pty6027,
         pty6028: progress.pty6028,
         supervisorFeedback: progress.supervisor_feedback,
+        modules,
         updatedAt: progress.updated_at
       }
     });
@@ -48,6 +57,7 @@ router.put('/:userId',
   body('monthlyUpdate').optional().trim(),
   body('pty6027').optional().isInt({ min: 0, max: 100 }),
   body('pty6028').optional().isInt({ min: 0, max: 100 }),
+  body('modules').optional().isArray(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -55,7 +65,8 @@ router.put('/:userId',
     }
 
     const userId = req.params.userId;
-    const { monthlyUpdate, pty6027, pty6028, supervisorFeedback } = req.body;
+    const { monthlyUpdate, pty6027, pty6028, supervisorFeedback, modules } = req.body;
+    const modulesJson = Array.isArray(modules) ? JSON.stringify(modules) : '[]';
 
     if (req.user.username !== userId && req.user.role !== 'supervisor') {
       return res.status(403).json({ message: 'Not authorized' });
@@ -67,14 +78,14 @@ router.put('/:userId',
       if (existing) {
         await runAsync(`
           UPDATE progress
-          SET monthly_update = ?, pty6027 = ?, pty6028 = ?, supervisor_feedback = ?, updated_at = CURRENT_TIMESTAMP
+          SET monthly_update = ?, pty6027 = ?, pty6028 = ?, supervisor_feedback = ?, modules_json = ?, updated_at = CURRENT_TIMESTAMP
           WHERE user_id = ?
-        `, [monthlyUpdate || '', pty6027 || 0, pty6028 || 0, supervisorFeedback || '', userId]);
+        `, [monthlyUpdate || '', pty6027 || 0, pty6028 || 0, supervisorFeedback || '', modulesJson, userId]);
       } else {
         await runAsync(`
-          INSERT INTO progress (user_id, monthly_update, pty6027, pty6028, supervisor_feedback)
-          VALUES (?, ?, ?, ?, ?)
-        `, [userId, monthlyUpdate || '', pty6027 || 0, pty6028 || 0, supervisorFeedback || '']);
+          INSERT INTO progress (user_id, monthly_update, pty6027, pty6028, supervisor_feedback, modules_json)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [userId, monthlyUpdate || '', pty6027 || 0, pty6028 || 0, supervisorFeedback || '', modulesJson]);
       }
 
       res.json({ message: 'Progress updated' });
