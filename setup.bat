@@ -127,7 +127,7 @@ echo.
 echo   3. Test credentials:
 echo      Student: simon / simon2026
 echo      Conveyor: dalvie / dalvie2026
-echo      Supervisor: martin / martin2026
+echo      Supervisor: martin / Martin2026
 echo.
 echo ===============================================================
 echo.
