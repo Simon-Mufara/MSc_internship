@@ -16,9 +16,10 @@ router.post('/login',
     }
 
     const { username, password } = req.body;
+    const normalizedUsername = String(username || '').trim().toLowerCase();
 
     try {
-      const user = await getAsync('SELECT * FROM users WHERE username = ?', [username]);
+      const user = await getAsync('SELECT * FROM users WHERE LOWER(username) = ?', [normalizedUsername]);
 
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });

@@ -56,6 +56,89 @@ const examTimetable = [
   }
 ];
 
+const onlineClassTimetable = [
+  {
+    title: 'IBS6024F Lecture - Biocomputing',
+    type: 'class',
+    date: '2026-05-13',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Hocine Bendou'
+  },
+  {
+    title: 'IBS6025F Lecture - Bioinformatic Programming',
+    type: 'class',
+    date: '2026-05-14',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Shareefa Dalvie'
+  },
+  {
+    title: 'IBS6026F Lecture - Machine Learning',
+    type: 'class',
+    date: '2026-05-15',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Musalula Sinkala'
+  },
+  {
+    title: 'PTY6027F Lecture - Omics Data Mining',
+    type: 'class',
+    date: '2026-05-13',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Shareefa Dalvie'
+  },
+  {
+    title: 'PTY6028F Lecture - Omics Data Generation',
+    type: 'class',
+    date: '2026-05-20',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Shareefa Dalvie'
+  },
+  {
+    title: 'Supervision Session - Simon',
+    type: 'class',
+    date: '2026-05-16',
+    description: 'Time: 3:00pm-4:00pm | Venue: Online (Teams) | Type: Online Class | Supervisor: Martin (UFS)'
+  },
+  {
+    title: 'Lab Session - Bioinformatics Tools',
+    type: 'class',
+    date: '2026-05-22',
+    description: 'Time: 3:00pm-5:00pm | Venue: Online (Zoom) | Type: Online Class | Instructor: Dalvie'
+  }
+];
+
+function normalizeUsername(username) {
+  return String(username || '').trim().toLowerCase();
+}
+
+function setupEventListeners() {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm && !loginForm.hasAttribute('onsubmit')) {
+    loginForm.addEventListener('submit', handleLogin);
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const usernameRaw = document.getElementById('usernameInput')?.value || '';
+  const username = normalizeUsername(usernameRaw);
+  const password = document.getElementById('passwordInput')?.value || '';
+  const loginBtn = document.getElementById('loginBtn');
+
+  if (!username || !password) {
+    showError('Username and password are required');
+    return;
+  }
+
+  if (loginBtn) loginBtn.disabled = true;
+  try {
+    const result = await api.auth.login(username, password);
+    currentUser = result?.user?.username || getUsername();
+    currentUserRole = result?.user?.role || getRole();
+    showApp();
+    await initApp();
+  } catch (error) {
+    showError(error.message || 'Invalid credentials');
+  } finally {
+    if (loginBtn) loginBtn.disabled = false;
+  }
+}
+
 function isAuthenticated() {
   return typeof api !== 'undefined' && typeof api.auth !== 'undefined' && !!localStorage.getItem('authToken');
 }
@@ -247,7 +330,7 @@ function ensureDefaultResearchProject() {
 
 function mergeExamTimetable() {
   const seen = new Set(appData.events.map(event => `${event.title}|${event.date}`));
-  examTimetable.forEach(event => {
+  [...examTimetable, ...onlineClassTimetable].forEach(event => {
     const key = `${event.title}|${event.date}`;
     if (!seen.has(key)) {
       appData.events.push({ ...event, created_by: 'dalvie', reminder: 0 });

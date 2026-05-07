@@ -277,9 +277,13 @@ const USE_MOCK_API = Boolean(window.API_BASE_OVERRIDE ? false : window.location.
 window.API_IS_MOCK = USE_MOCK_API;
 
 // --- Fallback mock API for GitHub Pages ---
-function makeMockToken(username) {
-  const payload = { username, role: 'student', iat: Date.now() };
+function makeMockToken(username, role = 'student') {
+  const payload = { username, role, iat: Date.now() };
   return `mock.${btoa(JSON.stringify(payload))}.sig`;
+}
+
+function normalizeUsername(username) {
+  return String(username || '').trim().toLowerCase();
 }
 
 function createMockApi() {
@@ -319,12 +323,13 @@ function createMockApi() {
   return {
     auth: {
       async login(username, password) {
-        const expectedPassword = store.users[username]?.password || `${username}2026`;
-        const role = store.users[username]?.role || (username === 'dalvie' ? 'conveyor' : username === 'martin' ? 'supervisor' : 'student');
+        const normalized = normalizeUsername(username);
+        const expectedPassword = store.users[normalized]?.password || `${normalized}2026`;
+        const role = store.users[normalized]?.role || (normalized === 'dalvie' ? 'conveyor' : normalized === 'martin' ? 'supervisor' : 'student');
         if (password === expectedPassword) {
-          const token = makeMockToken(username);
+          const token = makeMockToken(normalized, role);
           setAuthToken(token);
-          return { token, user: { username, role } };
+          return { token, user: { username: normalized, role } };
         }
         throw new Error('Invalid credentials (mock)');
       },
