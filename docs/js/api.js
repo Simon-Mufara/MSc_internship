@@ -301,7 +301,7 @@ function createMockApi() {
     users: {
       'simon': { password: 'simon2026', role: 'student' },
       'dalvie': { password: 'dalvie2026', role: 'conveyor' },
-      'martin': { password: 'martin2026', role: 'supervisor' }
+      'martin': { password: 'Martin2026', role: 'supervisor' }
     },
     events: [],
     assignments: [],
@@ -315,6 +315,8 @@ function createMockApi() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const merged = raw ? Object.assign({}, defaultStore, JSON.parse(raw)) : JSON.parse(JSON.stringify(defaultStore));
+      merged.users = Object.assign({}, defaultStore.users, merged.users || {});
+      merged.users.martin = Object.assign({}, merged.users.martin || {}, defaultStore.users.martin);
 
       // Migrate legacy message format ({ recipient: [msgs] }) to normalized array format.
       if (!Array.isArray(merged.messages) && merged.messages && typeof merged.messages === 'object') {
